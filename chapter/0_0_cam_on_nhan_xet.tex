@@ -27,54 +27,45 @@ Sinh viên
 \end{minipage}
 \end{flushright}
 
-% ================= NHẬN XÉT GIẢNG VIÊN PHẢN BIỆN =================
+\newcommand{\mydotfill}{\leavevmode\leaders\hbox to 0.32em{\hss.\hss}\hfill\kern0pt}
+
+\newcommand{\nhanxetpage}[2]{%
 \newpage
-\begin{center}
-    {\large \textbf{NHẬN XÉT ĐÁNH GIÁ CHO ĐIỂM}}\\[0.2cm]
-    {\large \textbf{(của giảng viên phản biện)}}
-\end{center}
-\vspace{0.5cm}
-
-\foreach \i in {1,...,15}{%
-    \noindent\makebox[\textwidth]{\dotfill}\\[0.35cm]%
+\vspace*{-1.0cm}
+{\centering
+    {\large \textbf{NHẬN XÉT ĐÁNH GIÁ CHO ĐIỂM}}\\[0.35cm]
+    {\large \textbf{#1}}\par
 }
+\vspace{0.95cm}
 
-\noindent\textbf{Điểm:} \makebox[3.5cm]{\dotfill}\ \textbf{(bằng chữ):} \dotfill\mbox{}\\[0.35cm]
+\begingroup
+\setlength{\parskip}{0pt}
+\begin{spacing}{1.0}
+\foreach \i in {1,...,15}{%
+    \noindent\makebox[\textwidth]{\mydotfill}\ifnum\i<15\\[0.16cm]\fi
+}
+\end{spacing}
+\endgroup
+
+\vspace{0.35cm}
+\noindent\textbf{Điểm:} \makebox[3.2cm]{\mydotfill}\ \textbf{(bằng chữ):} \mydotfill\hspace*{1.2cm}\mbox{}\\[0.25cm]
 \noindent\textbf{Đồng ý/ Không đồng ý} cho sinh viên bảo vệ trước hội đồng chấm đồ án tốt nghiệp?
 
-\vspace{1.2cm}
+\vspace{1.05cm}
 \begin{flushright}
-\begin{minipage}{8cm}
+\begin{minipage}{8.8cm}
 \centering
-\dots\dots\dots\dots, ngày \dots\dots\ tháng \dots\dots\ năm 2026\\[0.2cm]
-\textbf{CÁN BỘ - GIẢNG VIÊN PHẢN BIỆN}\\[0.15cm]
+\mbox{\makebox[1.8cm]{\mydotfill},\ ngày\makebox[0.9cm]{\mydotfill}tháng\makebox[0.9cm]{\mydotfill}năm 2026}\\[0.35cm]
+\textbf{#2}\\[0.35cm]
 (ký, họ tên)
 \end{minipage}
-\end{flushright}
+\end{flushright}%
+}
+
+% ================= NHẬN XÉT GIẢNG VIÊN PHẢN BIỆN =================
+\nhanxetpage{(của giảng viên phản biện)}{CÁN BỘ - GIẢNG VIÊN PHẢN BIỆN}
 
 % ================= NHẬN XÉT GIẢNG VIÊN HƯỚNG DẪN =================
-\newpage
-\begin{center}
-    {\large \textbf{NHẬN XÉT ĐÁNH GIÁ CHO ĐIỂM}}\\[0.2cm]
-    {\large \textbf{(của giảng viên hướng dẫn)}}
-\end{center}
-\vspace{0.5cm}
-
-\foreach \i in {1,...,15}{%
-    \noindent\makebox[\textwidth]{\dotfill}\\[0.35cm]%
-}
-
-\noindent\textbf{Điểm:} \makebox[3.5cm]{\dotfill}\ \textbf{(bằng chữ):} \dotfill\mbox{}\\[0.35cm]
-\noindent\textbf{Đồng ý/ Không đồng ý} cho sinh viên bảo vệ trước hội đồng chấm đồ án tốt nghiệp?
-
-\vspace{1.2cm}
-\begin{flushright}
-\begin{minipage}{8cm}
-\centering
-\dots\dots\dots\dots, ngày \dots\dots\ tháng \dots\dots\ năm 2026\\[0.2cm]
-\textbf{CÁN BỘ - GIẢNG VIÊN HƯỚNG DẪN}\\[0.15cm]
-(ký, họ tên)
-\end{minipage}
-\end{flushright}
+\nhanxetpage{(của giảng viên hướng dẫn)}{CÁN BỘ - GIẢNG VIÊN HƯỚNG DẪN}
 
 \end{document}
