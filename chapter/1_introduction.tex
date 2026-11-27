@@ -1,59 +1,73 @@
 \documentclass[../main.tex]{subfiles}
 \begin{document}
 
-Trong chương này, đồ án sẽ giới thiệu tổng quan về ứng dụng theo dõi và quản lý dinh dưỡng cá nhân, đồng thời khảo sát một số ứng dụng quản lý dinh dưỡng đang được triển khai trong thực tế. Qua đó, đồ án xác định mục tiêu, các nhóm chức năng chính và đặc điểm khái quát của hệ thống. Bên cạnh đó, chương này cũng trình bày các công nghệ và nền tảng kỹ thuật được sử dụng trong quá trình phát triển ứng dụng.
+Trong chương này, đồ án trình bày tổng quan về bài toán xây dựng ứng dụng hỗ trợ chăm sóc sức khỏe và dinh dưỡng tích hợp trí tuệ nhân tạo (AI), đồng thời khảo sát một số ứng dụng thực tế hiện có để chỉ ra các hạn chế còn tồn tại đối với người dùng Việt Nam. Trên cơ sở đó, chương xác định mục tiêu, các nhóm chức năng cốt lõi, luồng nghiệp vụ chính và hệ sinh thái công nghệ được lựa chọn để phát triển hệ thống.
 
-\section{Tổng quan về ứng dụng theo dõi và quản lý dinh dưỡng cá nhân}
+\section{Tổng quan về ứng dụng chăm sóc sức khỏe và dinh dưỡng tích hợp AI}
 \label{sec:1.1}
 
-\subsection{Giới thiệu về ứng dụng theo dõi và quản lý dinh dưỡng cá nhân}
+\subsection{Giới thiệu chung}
 \label{sec:1.1.1}
 
-\subsubsection{Ứng dụng theo dõi và quản lý dinh dưỡng cá nhân là gì?}
+\subsubsection{Khái niệm và vai trò của ứng dụng chăm sóc sức khỏe và dinh dưỡng}
 
-\textbf{Ứng dụng theo dõi và quản lý dinh dưỡng cá nhân} là một giải pháp phần mềm đóng vai trò như một trợ lý sức khỏe cá nhân, hỗ trợ người dùng theo dõi dinh dưỡng, kiểm soát cân nặng và theo dõi vận động thể chất hằng ngày một cách tiện lợi, khoa học. Ứng dụng cho phép ghi nhận thông tin bữa ăn, tính toán các chỉ số sinh trắc học (BMI, TDEE), nhu cầu năng lượng (calo) và tỷ lệ các nhóm chất đa lượng (protein, chất béo, carbohydrate).
+Ứng dụng hỗ trợ chăm sóc sức khỏe và dinh dưỡng cá nhân là giải pháp phần mềm đóng vai trò như một trợ lý sức khỏe số, giúp người dùng theo dõi chế độ ăn uống, kiểm soát cân nặng và quản lý hoạt động thể chất hằng ngày một cách chủ động và khoa học. Thông qua việc ghi nhận khẩu phần ăn, lượng nước uống và mức độ vận động, hệ thống tự động tính toán các chỉ số sinh trắc học như chỉ số khối cơ thể (BMI), tổng năng lượng tiêu hao hằng ngày (TDEE), nhu cầu calo cũng như tỷ lệ các nhóm chất đa lượng (protein, chất béo, carbohydrate) và một số vi chất liên quan.
 
-Với sự phát triển của công nghệ trí tuệ nhân tạo (AI) và thị giác máy tính, các ứng dụng hiện đại tích hợp pipeline nhận diện món ăn trực tiếp từ ảnh chụp và ước lượng calo tự động. Điều này giúp giảm thiểu thao tác nhập liệu thủ công, nâng cao độ chính xác và mang lại trải nghiệm liền mạch cho người dùng.
+Với sự phát triển của trí tuệ nhân tạo (AI) và thị giác máy tính, các ứng dụng thế hệ mới không chỉ dừng ở việc nhập liệu thủ công mà còn tích hợp mô hình nhận diện món ăn trực tiếp từ ảnh chụp để tự động ước lượng thành phần dinh dưỡng. Bên cạnh đó, việc kết hợp trợ lý ảo thông minh và đồng bộ dữ liệu từ các cảm biến sức khỏe giúp cá nhân hóa thực đơn theo thể trạng, mục tiêu cân nặng hoặc tình trạng bệnh lý đặc thù (tim mạch, tiểu đường, mỡ máu), mang lại trải nghiệm liền mạch và nâng cao hiệu quả chăm sóc sức khỏe dài hạn.
 
 \subsubsection{Mục tiêu của đồ án}
 
-Đồ án hướng tới xây dựng ứng dụng hỗ trợ chăm sóc sức khỏe và dinh dưỡng tích hợp AI đóng vai trò như một trợ lý sức khỏe cá nhân. Ứng dụng hỗ trợ người dùng theo dõi dinh dưỡng, kiểm soát cân nặng và theo dõi vận động thể chất một cách tiện lợi, tự động hóa thông qua việc tích hợp pipeline nhận diện món ăn Việt Nam và ước lượng calo được xây dựng, triển khai độc lập mà không phụ thuộc vào các dịch vụ API bên thứ ba.
+Đồ án hướng tới việc xây dựng một ứng dụng di động hỗ trợ chăm sóc sức khỏe và dinh dưỡng tích hợp AI dành cho người dùng Việt Nam. Hệ thống không chỉ hỗ trợ ghi nhận bữa ăn, theo dõi lượng nước uống, cân nặng và quá trình vận động hằng ngày, mà còn tự động hóa khâu nhận diện món ăn Việt Nam và ước lượng calo từ ảnh chụp bằng mô hình YOLOv11m huấn luyện trên tập dữ liệu VietFood68, triển khai độc lập qua dịch vụ FastAPI và ONNX Runtime mà không phụ thuộc vào các API AI trả phí của bên thứ ba.
 
-\subsection{Một số ứng dụng quản lý tương tự được triển khai trong thực tế}
+Song song với nhận diện món ăn, đồ án đặt mục tiêu cung cấp các tính năng tư vấn cá nhân hóa thông qua Chatbot AI và bộ gợi ý thực đơn dựa trên mục tiêu calo, thực phẩm dị ứng, tình trạng sức khỏe và ngân sách dự kiến. Về mặt kỹ thuật, ứng dụng được phát triển đa nền tảng với giao diện thân thiện, hỗ trợ hoạt động ngoại tuyến (offline-first) và đồng bộ thời gian thực, tạo nền tảng vững chắc cho khả năng mở rộng trong tương lai.
+
+\subsection{Khảo sát một số ứng dụng thực tế hiện có}
 \label{sec:1.1.2}
 
 \subsubsection{Ứng dụng Food Visor}
-\begin{itemize}
-    \item \textbf{Food Visor} là một ứng dụng quản lý dinh dưỡng phổ biến trên nền tảng di động, nổi bật với khả năng nhận diện món ăn từ hình ảnh bằng công nghệ trí tuệ nhân tạo. Người dùng có thể chụp ảnh bữa ăn, hệ thống sẽ tự động phân tích và ước lượng lượng calo cũng như các thành phần dinh dưỡng cơ bản.
-    \item \textbf{Ưu điểm:} Giao diện trực quan, hỗ trợ đặt mục tiêu cân nặng và thu thập thông tin thể trạng ban đầu chi tiết khi đăng ký.
-    \item \textbf{Hạn chế:} Chủ yếu tập trung vào các món ăn Âu -- Mỹ nên khả năng nhận diện và tính toán dinh dưỡng cho các món ăn Việt Nam chưa chính xác; nhiều tính năng nâng cao yêu cầu trả phí.
-\end{itemize}
+
+Food Visor là ứng dụng theo dõi dinh dưỡng phổ biến trên thiết bị di động, nổi bật với khả năng nhận diện thực phẩm từ ảnh chụp bữa ăn bằng công nghệ thị giác máy tính (Hình \ref{fig:ch1_foodvisor}). Sau khi người dùng chụp ảnh, hệ thống tự động phân loại thành phần trên đĩa ăn và ước lượng lượng calo cùng các chất đa lượng cơ bản. Ưu điểm của Food Visor là giao diện trực quan, quy trình khảo sát thể trạng ban đầu chi tiết và khả năng thiết lập mục tiêu cân nặng rõ ràng. Tuy nhiên, bộ dữ liệu của ứng dụng chủ yếu phục vụ ẩm thực Âu -- Mỹ nên độ chính xác khi nhận diện các món ăn truyền thống Việt Nam còn thấp, đồng thời nhiều tính năng phân tích chuyên sâu yêu cầu người dùng trả phí định kỳ.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=7.2cm,keepaspectratio]{food_visor.jpeg}
+    \caption{Giao diện ứng dụng Food Visor}
+    \label{fig:ch1_foodvisor}
+\end{figure}
 
 \subsubsection{Ứng dụng Wao}
-\begin{itemize}
-    \item \textbf{Wao} là ứng dụng theo dõi dinh dưỡng hướng tới người dùng Việt Nam, tập trung vào ghi nhận bữa ăn, tính toán chỉ số TDEE, gợi ý thực đơn và theo dõi lượng calo tiêu thụ hằng ngày.
-    \item \textbf{Ưu điểm:} Hỗ trợ tiếng Việt, cơ sở dữ liệu món ăn thuần Việt tương đối phong phú và dễ tiếp cận.
-    \item \textbf{Hạn chế:} Chưa tích hợp mạnh mẽ công nghệ nhận diện món ăn từ ảnh chụp và còn thiếu các tính năng tương tác xã hội, tạo động lực (streak, thử thách) hay đồng bộ sâu với cảm biến vận động.
-\end{itemize}
+
+Wao là một ứng dụng hướng tới người dùng Việt Nam, tập trung vào việc ghi nhận nhật ký bữa ăn hằng ngày, tính toán chỉ số TDEE và đề xuất thực đơn mẫu phù hợp với mục tiêu giảm cân hoặc tăng cân (Hình \ref{fig:ch1_wao}). Điểm mạnh của Wao là giao diện hoàn toàn bằng tiếng Việt cùng cơ sở dữ liệu món ăn nội địa tương đối phong phú và dễ sử dụng. Mặc dù vậy, ứng dụng chưa tích hợp mạnh mẽ công nghệ nhận diện món ăn trực tiếp từ ảnh chụp, còn thiếu các tính năng trợ lý tư vấn AI chuyên sâu theo ngữ cảnh lịch sử ăn uống và hạn chế ở mảng tương tác cộng đồng hay đồng bộ tự động từ cảm biến vận động.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=7.2cm,keepaspectratio]{w.png}
+    \caption{Giao diện ứng dụng Wao}
+    \label{fig:ch1_wao}
+\end{figure}
 
 \subsubsection{Ứng dụng Snap Calorie}
-\begin{itemize}
-    \item \textbf{Snap Calorie} ứng dụng thị giác máy tính để nhận diện thức ăn từ ảnh chụp hoặc video, kết hợp ước lượng khối lượng khẩu phần ăn.
-    \item \textbf{Hạn chế:} Bộ dữ liệu chưa tối ưu cho ẩm thực truyền thống Việt Nam và thiếu khả năng tư vấn thực đơn cá nhân hóa theo ngân sách, dị ứng cũng như đồng bộ lịch sử vận động toàn diện.
-\end{itemize}
+
+Snap Calorie sử dụng các thuật toán thị giác máy tính và cảm biến độ sâu trên điện thoại để nhận diện món ăn từ ảnh chụp hoặc video, từ đó ước lượng thể tích và khối lượng khẩu phần ăn một cách tương đối chính xác (Hình \ref{fig:ch1_snapcalorie}). Ưu điểm nổi bật của ứng dụng là tốc độ phản hồi nhanh và khả năng ước lượng định lượng khẩu phần mà không cần cân đo thủ công. Tuy nhiên, tương tự các sản phẩm quốc tế khác, tập dữ liệu của Snap Calorie chưa được tối ưu cho món ăn Việt Nam có nhiều nguyên liệu trộn lẫn, đồng thời chưa hỗ trợ tư vấn thực đơn theo ngân sách, dị ứng hay kết hợp hệ thống tạo động lực dài hạn cho người dùng.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=7.2cm,keepaspectratio]{snap_calories.png}
+    \caption{Giao diện ứng dụng Snap Calorie}
+    \label{fig:ch1_snapcalorie}
+\end{figure}
+
+Từ kết quả khảo sát các ứng dụng trên, Bảng \ref{tab:ch1_app_comparison} tổng hợp sự khác biệt giữa các giải pháp hiện có và hệ thống đề xuất trong đồ án.
 
 \begin{table}[H]
     \centering
-    \caption{So sánh một số ứng dụng theo dõi dinh dưỡng hiện có với hệ thống đề xuất}
-    \label{tab:ch1_app_comparison}
-    \arrayrulecolor{primary}
-    \rowcolors{2}{primary!10}{white}
-    \begin{tabular}{|p{0.22\textwidth}|p{0.23\textwidth}|p{0.21\textwidth}|p{0.24\textwidth}|}
+    \begingroup
+    \renewcommand{\arraystretch}{1.35}
+    \begin{tabular}{|>{\raggedright\arraybackslash}p{0.22\textwidth}|>{\raggedright\arraybackslash}p{0.23\textwidth}|>{\raggedright\arraybackslash}p{0.21\textwidth}|>{\raggedright\arraybackslash}p{0.24\textwidth}|}
         \hline
-        \rowcolor{primary!35}
-        \textbf{Tiêu chí} & \textbf{Food Visor} & \textbf{Wao} & \textbf{Hệ thống đề xuất} \\
+        \multicolumn{1}{|c|}{\textbf{Tiêu chí}} & \multicolumn{1}{c|}{\textbf{Food Visor}} & \multicolumn{1}{c|}{\textbf{Wao}} & \multicolumn{1}{c|}{\textbf{Hệ thống đề xuất}} \\
         \hline
-        Nhận diện món ăn AI & Có (chủ yếu món Âu -- Mỹ) & Chưa hỗ trợ mạnh & Có (pipeline độc lập, tập VietFood68) \\
+        Nhận diện món ăn AI & Có (chủ yếu món Âu -- Mỹ) & Chưa hỗ trợ mạnh & Có (YOLOv11m độc lập, tập VietFood68) \\
         \hline
         Trợ lý AI \& Thực đơn & Gợi ý cơ bản & Thực đơn mẫu & Chatbot AI + gợi ý theo calo, dị ứng, ngân sách \\
         \hline
@@ -64,65 +78,90 @@ Với sự phát triển của công nghệ trí tuệ nhân tạo (AI) và th�
         Chế độ ngoại tuyến & Hạn chế & Hạn chế & Hỗ trợ offline và tự động đồng bộ \\
         \hline
     \end{tabular}
-    \arrayrulecolor{black}
-    \rowcolors{2}{}{}
+    \endgroup
+    \caption{So sánh một số ứng dụng chăm sóc sức khỏe và dinh dưỡng hiện có với hệ thống đề xuất}
+    \label{tab:ch1_app_comparison}
 \end{table}
 
 \subsection{Giới thiệu tổng quát về các chức năng của hệ thống}
 \label{sec:1.1.3}
 
-Hệ thống được thiết kế gồm 7 nhóm chức năng chính nhằm đáp ứng toàn diện nhu cầu chăm sóc sức khỏe và dinh dưỡng cá nhân:
 \subsubsection{Các nhóm chức năng chính của hệ thống}
 
 Hệ thống được thiết kế xoay quanh đối tượng người dùng cá nhân với 7 nhóm chức năng chính nhằm đáp ứng toàn diện nhu cầu theo dõi dinh dưỡng, vận động và chăm sóc sức khỏe:
+
 \begin{itemize}
-    \item \textbf{Quản lý tài khoản \& hồ sơ sức khỏe:} Đăng ký, đăng nhập (Email / Google OAuth2) và khôi phục mật khẩu; thiết lập thông tin thể trạng, mục tiêu cân nặng và thực phẩm dị ứng; tự động tính chỉ số BMI, TDEE và mục tiêu calo hằng ngày.
-    \item \textbf{Quản lý dinh dưỡng \& bữa ăn:} Ghi nhật ký bữa ăn theo buổi (Sáng, Trưa, Tối, Bữa phụ); nhận diện món ăn Việt Nam và tự động tính calo/macro qua ảnh chụp bằng AI; tra cứu dữ liệu món ăn và quét mã vạch thực phẩm đóng gói; tự tạo và quản lý món ăn tùy chỉnh.
-    \item \textbf{Lập kế hoạch bữa ăn \& Trợ lý AI:} Gợi ý thực đơn cá nhân hóa theo mục tiêu calo, dị ứng và ngân sách; Chatbot tư vấn dinh dưỡng thông minh dựa trên lịch sử ăn uống.
-    \item \textbf{Theo dõi vận động \& chỉ số cơ thể:} Ghi nhận hoạt động tập luyện và calo tiêu hao; đồng bộ tự động bước chân, nhịp tim qua Google Fit / Apple Health; ghi nhận và theo dõi lịch sử cân nặng.
-    \item \textbf{Báo cáo \& thống kê:} Dashboard tổng quan tiến độ dinh dưỡng, nước uống và vận động theo thời gian thực; biểu đồ phân tích calo, macro, cân nặng theo Ngày / Tuần / Tháng; dự đoán xu hướng cân nặng và thời gian đạt mục tiêu.
-    \item \textbf{Streak \& tạo động lực:} Theo dõi chuỗi ngày hoàn thành mục tiêu; hệ thống thử thách và huy hiệu thành tích; bảng xếp hạng bạn bè thời gian thực.
-    \item \textbf{Tiện ích \& hệ thống:} Thông báo, nhắc nhở thông minh (uống nước, ghi log, cảnh báo vượt calo); hỗ trợ hoạt động ngoại tuyến và tự động đồng bộ khi có kết nối mạng.
+    \item Quản lý tài khoản và hồ sơ sức khỏe: cho phép đăng ký, đăng nhập bằng Email hoặc Google OAuth2, khôi phục mật khẩu; thiết lập thông số thể trạng, mục tiêu cân nặng, danh sách thực phẩm dị ứng và tự động tính chỉ số BMI, TDEE cùng định mức calo hằng ngày.
+    \item Quản lý dinh dưỡng và bữa ăn: ghi nhật ký bữa ăn theo từng buổi (Sáng, Trưa, Tối, Bữa phụ); nhận diện món ăn Việt Nam và tính calo/macro từ ảnh chụp bằng AI; tra cứu dữ liệu món ăn, quét mã vạch sản phẩm đóng gói và tạo món ăn tùy chỉnh.
+    \item Lập kế hoạch bữa ăn và Trợ lý AI: gợi ý thực đơn cá nhân hóa theo mục tiêu calo, thực phẩm dị ứng, tình trạng sức khỏe và ngân sách; tích hợp Chatbot AI tư vấn dinh dưỡng dựa trên lịch sử ăn uống thực tế.
+    \item Theo dõi vận động và chỉ số cơ thể: ghi nhận các buổi tập luyện thể thao và lượng calo tiêu hao; đồng bộ tự động số bước chân, nhịp tim qua Google Fit hoặc Apple Health; theo dõi diễn biến cân nặng và lượng nước uống.
+    \item Báo cáo và thống kê: cung cấp màn hình tổng quan theo thời gian thực; hiển thị biểu đồ calo, tỷ lệ các nhóm chất đa lượng và cân nặng theo Ngày, Tuần hoặc Tháng kèm dự đoán xu hướng đạt mục tiêu.
+    \item Streak và tạo động lực: ghi nhận chuỗi ngày hoàn thành mục tiêu liên tiếp, mở khóa huy hiệu thành tích, tham gia thử thách và theo dõi bảng xếp hạng bạn bè theo thời gian thực.
+    \item Tiện ích và hệ thống: gửi thông báo nhắc nhở thông minh (uống nước, ghi nhật ký bữa ăn, cảnh báo vượt ngưỡng calo) và hỗ trợ lưu trữ cục bộ khi ngoại tuyến để tự động đồng bộ khi có mạng.
 \end{itemize}
 
 \subsubsection{Mô tả chi tiết các màn hình và luồng nghiệp vụ chính}
 
-\begin{itemize}
-    \item \textbf{Màn hình Đăng nhập, Đăng ký \& Thiết lập hồ sơ sức khỏe:} Người dùng có thể đăng ký tài khoản mới bằng Email/Mật khẩu, đăng nhập nhanh thông qua Google OAuth2 hoặc thực hiện khôi phục mật khẩu khi quên. Sau khi đăng nhập lần đầu, hệ thống hiển thị biểu mẫu khảo sát thông số thể trạng (chiều cao, cân nặng, tuổi, giới tính, mức độ vận động), mục tiêu cân nặng (giảm cân, giữ cân, tăng cân) và danh sách thực phẩm dị ứng. Từ dữ liệu này, hệ thống tự động tính toán chỉ số BMI, TDEE và định mức calo cùng tỷ lệ chất đạm (Protein), tinh bột (Carbohydrate), chất béo (Fat) mục tiêu mỗi ngày.
-    \item \textbf{Màn hình Trang chủ (Dashboard):} Là màn hình trung tâm hiển thị theo thời gian thực tổng lượng calo đã nạp, lượng calo tiêu hao qua vận động, lượng calo còn lại trong ngày, tiến độ uống nước và số bước chân. Ngoài ra, Dashboard cung cấp các lối tắt nhanh tới chức năng chụp ảnh nhận diện món ăn, quét mã vạch, ghi nhận bữa ăn theo buổi (Sáng, Trưa, Tối, Bữa phụ) và chuỗi ngày hoàn thành mục tiêu (streak).
-    \item \textbf{Màn hình Nhận diện món ăn AI:} Cho phép người dùng mở camera chụp trực tiếp hoặc chọn ảnh bữa ăn có sẵn từ thư viện thiết bị. Ảnh được gửi tới dịch vụ AI độc lập để nhận diện món ăn Việt Nam (dựa trên mô hình YOLO huấn luyện trên tập dữ liệu VietFood68), tự động ước lượng khẩu phần và trả về danh sách món ăn kèm giá trị dinh dưỡng chi tiết (calo, protein, carbs, fat). Người dùng có thể điều chỉnh lại số lượng khẩu phần trước khi lưu vào nhật ký bữa ăn.
-    \item \textbf{Màn hình Tra cứu món ăn, Quét mã vạch \& Món ăn tùy chỉnh:} Người dùng nhập từ khóa vào thanh tìm kiếm để tra cứu thông tin dinh dưỡng trong cơ sở dữ liệu món ăn Việt Nam hoặc sử dụng camera quét mã vạch trên bao bì thực phẩm đóng gói để lấy nhanh thành phần dinh dưỡng. Đối với các món ăn tự nấu tại nhà, người dùng có thể tự tạo và lưu công thức món ăn tùy chỉnh bằng cách nhập các nguyên liệu thành phần.
-    \item \textbf{Màn hình Lập kế hoạch bữa ăn \& Chatbot tư vấn AI:} Hệ thống cho phép người dùng thiết lập các ràng buộc về mục tiêu calo hằng ngày, danh sách thực phẩm dị ứng và ngân sách dự kiến để AI gợi ý thực đơn phù hợp theo ngày hoặc tuần. Bên cạnh đó, Chatbot AI đóng vai trò trợ lý tư vấn dinh dưỡng thông minh, phân tích lịch sử ăn uống thực tế của người dùng để giải đáp thắc mắc và đề xuất điều chỉnh khẩu phần kịp thời.
-    \item \textbf{Màn hình Theo dõi vận động \& Chỉ số cơ thể:} Người dùng có thể ghi nhận thủ công các buổi tập luyện thể dục (chạy bộ, đạp xe, gym, bơi lội, \dots) để tính lượng calo tiêu hao, hoặc cấp quyền đồng bộ tự động số bước chân, nhịp tim từ Google Fit (Android) và Apple Health (iOS). Màn hình cũng cho phép cập nhật cân nặng định kỳ để theo dõi sự thay đổi thể trạng theo thời gian.
-    \item \textbf{Màn hình Báo cáo \& Thống kê:} Hiển thị trực quan các biểu đồ cột, biểu đồ tròn và biểu đồ đường phân tích lượng calo nạp vào/tiêu hao, tỷ lệ các nhóm chất đa lượng (macro) và biến động cân nặng theo chu kỳ Ngày / Tuần / Tháng. Dựa trên tốc độ thay đổi cân nặng và mức thâm hụt/dư thừa calo trung bình, hệ thống đưa ra dự đoán xu hướng cân nặng và ước tính thời gian đạt được mục tiêu đề ra.
-    \item \textbf{Màn hình Streak, Thử thách \& Bảng xếp hạng:} Ghi nhận chuỗi ngày liên tiếp người dùng hoàn thành mục tiêu dinh dưỡng và vận động, trao các huy hiệu thành tích khi vượt qua các cột mốc thử thách. Hệ thống tích hợp bảng xếp hạng bạn bè cập nhật theo thời gian thực thông qua WebSocket nhằm tăng tính gắn kết và duy trì động lực tập luyện lâu dài.
-    \item \textbf{Hệ thống Thông báo thông minh \& Chế độ ngoại tuyến:} Ứng dụng gửi thông báo đẩy nhắc nhở uống nước định kỳ, nhắc ghi nhật ký bữa ăn đúng giờ và phát cảnh báo khi lượng calo nạp vào tiệm cận hoặc vượt ngưỡng cho phép. Khi thiết bị mất kết nối Internet, mọi thao tác ghi nhận bữa ăn, nước uống và tập luyện vẫn được lưu trữ cục bộ an toàn và tự động đồng bộ lên máy chủ ngay khi có mạng trở lại.
-\end{itemize}
+Luồng trải nghiệm của người dùng bắt đầu từ màn hình Đăng nhập, Đăng ký và Thiết lập hồ sơ sức khỏe. Người dùng có thể tạo tài khoản bằng Email/Mật khẩu, đăng nhập nhanh thông qua Google OAuth2 hoặc khôi phục mật khẩu khi cần. Trong lần sử dụng đầu tiên, hệ thống thu thập các thông số cơ bản gồm chiều cao, cân nặng, tuổi, giới tính, mức độ vận động, mục tiêu cân nặng (giảm cân, giữ cân hoặc tăng cân) và danh sách thực phẩm dị ứng. Từ tập dữ liệu này, hệ thống tự động tính toán chỉ số BMI, TDEE và định mức calo cùng tỷ lệ protein, carbohydrate, chất béo mục tiêu cho mỗi ngày.
+
+Sau khi hoàn tất thiết lập, màn hình Trang chủ (Dashboard) đóng vai trò trung tâm điều phối, hiển thị theo thời gian thực tổng lượng calo đã nạp, lượng calo tiêu hao qua vận động, lượng calo còn lại trong ngày, tiến độ uống nước, số bước chân và chuỗi ngày duy trì mục tiêu (streak). Từ đây, người dùng có thể truy cập nhanh các thao tác ghi nhận bữa ăn theo buổi, chụp ảnh nhận diện món ăn hoặc quét mã vạch thực phẩm đóng gói.
+
+Đối với nghiệp vụ ghi nhận bữa ăn, màn hình Nhận diện món ăn AI cho phép chụp ảnh trực tiếp bằng camera hoặc chọn ảnh từ thư viện thiết bị. Ảnh được gửi tới dịch vụ AI độc lập sử dụng mô hình YOLOv11m huấn luyện trên tập dữ liệu VietFood68 để nhận diện món ăn Việt Nam, ước lượng khẩu phần và trả về giá trị dinh dưỡng chi tiết để người dùng hiệu chỉnh trước khi lưu. Trong trường hợp tự nấu ăn hoặc sử dụng thực phẩm đóng gói, màn hình Tra cứu món ăn, Quét mã vạch và Món ăn tùy chỉnh hỗ trợ tìm kiếm nhanh trong cơ sở dữ liệu món ăn Việt Nam, đọc mã vạch trên bao bì hoặc tự định nghĩa công thức từ các nguyên liệu thành phần.
+
+Ở nhóm chức năng tư vấn và theo dõi sức khỏe dài hạn, màn hình Lập kế hoạch bữa ăn và Chatbot tư vấn AI cho phép thiết lập các ràng buộc về calo, dị ứng và ngân sách để gợi ý thực đơn theo ngày hoặc tuần, đồng thời giải đáp thắc mắc dinh dưỡng dựa trên lịch sử ăn uống của từng cá nhân. Song song đó, màn hình Theo dõi vận động và Chỉ số cơ thể ghi nhận các hoạt động tập luyện (chạy bộ, đạp xe, gym, bơi lội) hoặc đồng bộ dữ liệu bước chân, nhịp tim từ Google Fit (Android) và Apple Health (iOS), kết hợp cập nhật cân nặng định kỳ.
+
+Toàn bộ dữ liệu dinh dưỡng và vận động được tổng hợp tại màn hình Báo cáo và Thống kê thông qua các biểu đồ cột, biểu đồ tròn và biểu đồ đường theo chu kỳ Ngày, Tuần, Tháng, qua đó ước tính xu hướng thay đổi cân nặng và thời gian đạt mục tiêu. Để duy trì thói quen lành mạnh, màn hình Streak, Thử thách và Bảng xếp hạng ghi nhận các cột mốc thành tích, trao huy hiệu và cập nhật bảng xếp hạng bạn bè theo thời gian thực qua WebSocket. Cuối cùng, hệ thống thông báo thông minh và cơ chế lưu trữ ngoại tuyến đảm bảo người dùng luôn nhận được nhắc nhở đúng lúc và có thể ghi nhật ký liên tục ngay cả khi mất kết nối Internet.
 
 \section{Các công nghệ sử dụng trong hệ thống}
 \label{sec:1.2}
 
-\subsection{Giới thiệu về React Native, Expo \& TypeScript (Frontend)}
+\subsection{Giới thiệu về React Native, Expo và TypeScript (Frontend)}
 \label{sec:1.2.1}
 
 \subsubsection{Tổng quan về React Native, Expo và TypeScript}
-\textbf{React Native} là framework phát triển ứng dụng di động đa nền tảng mã nguồn mở do Meta phát triển, cho phép xây dựng ứng dụng chạy trực tiếp trên cả Android và iOS từ một mã nguồn thống nhất. Kết hợp với nền tảng \textbf{Expo} và ngôn ngữ \textbf{TypeScript} (bổ sung kiểm tra kiểu dữ liệu tĩnh cho JavaScript), quá trình phát triển giao diện trở nên nhanh chóng, giảm thiểu lỗi runtime và dễ dàng bảo trì khi dự án mở rộng.
 
-\subsubsection{Lý do chọn và sự phù hợp với đồ án}
-\begin{itemize}
-    \item \textbf{Hiệu năng và trải nghiệm người dùng mượt mà:} Khác với các ứng dụng web đóng gói (hybrid WebView), React Native ánh xạ trực tiếp sang các thành phần giao diện gốc (Native Components), đảm bảo thao tác cuộn danh sách nhật ký bữa ăn, chuyển màn hình qua \textbf{React Navigation} và hiển thị biểu đồ thống kê calo/macro bằng \textbf{Victory / Recharts Native} đạt độ mượt mà cao.
-    \item \textbf{Quản lý dữ liệu và hỗ trợ ngoại tuyến hiệu quả:} Việc kết hợp \textbf{Zustand / Redux Toolkit} (quản lý trạng thái ứng dụng) với \textbf{React Query} (caching, tự động đồng bộ lại API khi có mạng) giúp ứng dụng hoạt động ổn định ngay cả khi người dùng mất kết nối Internet.
-    \item \textbf{Tích hợp sâu phần cứng và cảm biến sức khỏe:} Hệ sinh thái Expo và React Native hỗ trợ trực tiếp các module như \texttt{expo-sensors}, \texttt{expo-location}, \texttt{vision-camera-code-scanner} (quét mã vạch sản phẩm đóng gói) và \texttt{react-native-health-connect} / \texttt{react-native-health} để đồng bộ tự động số bước chân, nhịp tim từ Google Fit và Apple Health.
-\end{itemize}
+React Native là framework phát triển ứng dụng di động đa nền tảng mã nguồn mở do Meta phát triển, cho phép xây dựng ứng dụng chạy trên cả Android và iOS từ một mã nguồn thống nhất. Khi kết hợp với nền tảng Expo (cùng công cụ kiểm thử nhanh Expo Go, Hình \ref{fig:ch1_rn_expo}) và ngôn ngữ TypeScript (bổ sung kiểm tra kiểu dữ liệu tĩnh cho JavaScript), quá trình xây dựng giao diện trở nên nhanh chóng, hạn chế lỗi tại thời điểm chạy (runtime) và thuận tiện cho việc bảo trì khi hệ thống mở rộng.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.38\textwidth}
+        \centering
+        \includegraphics[height=2.8cm,keepaspectratio]{react_native.png}
+        \caption{React Native}
+    \end{subfigure}
+    \hspace{0.8cm}
+    \begin{subfigure}[b]{0.38\textwidth}
+        \centering
+        \includegraphics[height=2.8cm,keepaspectratio]{expo_go.png}
+        \caption{Expo Go}
+    \end{subfigure}
+    \caption{Nền tảng React Native và Expo Go sử dụng ở tầng Frontend}
+    \label{fig:ch1_rn_expo}
+\end{figure}
+
+\subsubsection{Lý do lựa chọn và sự phù hợp với đồ án}
+
+Khác với các ứng dụng web đóng gói dạng WebView, React Native ánh xạ trực tiếp sang các thành phần giao diện gốc (Native Components), giúp thao tác cuộn nhật ký bữa ăn, chuyển màn hình qua React Navigation và hiển thị các biểu đồ calo, macro bằng Victory / Recharts Native đạt độ mượt mà cao. Về quản lý dữ liệu, sự kết hợp giữa Zustand / Redux Toolkit và React Query giúp lưu cache cục bộ, xếp hàng thao tác và tự động đồng bộ API khi kết nối mạng khôi phục, đáp ứng tốt yêu cầu hoạt động ngoại tuyến.
+
+Ngoài ra, hệ sinh thái Expo và React Native hỗ trợ trực tiếp nhiều module phần cứng và sức khỏe cần thiết cho đồ án như \textit{expo-sensors}, \textit{expo-location}, \textit{vision-camera-code-scanner} phục vụ quét mã vạch sản phẩm đóng gói, cùng \textit{react-native-health-connect} và \textit{react-native-health} để đồng bộ tự động số bước chân, nhịp tim từ Google Fit và Apple Health.
 
 \subsection{Giới thiệu về Spring Boot (Backend chính)}
 \label{sec:1.2.2}
 
 \subsubsection{Giới thiệu về hệ sinh thái Spring}
-Spring là một Framework phát triển ứng dụng Java được sử dụng rộng rãi trong các hệ thống doanh nghiệp nhờ hiệu năng cao, khả năng kiểm thử tốt và tính mô-đun hóa cao. Spring Framework được xây dựng dựa trên hai nguyên tắc thiết kế cốt lõi là \textbf{Dependency Injection (DI)} và \textbf{Aspect Oriented Programming (AOP)}, giúp giảm sự phụ thuộc cứng giữa các thành phần và tổ chức mã nguồn sạch theo mô hình POJO (\textit{Plain Old Java Object}).
+
+Spring là framework phát triển ứng dụng Java được sử dụng rộng rãi trong các hệ thống doanh nghiệp nhờ hiệu năng ổn định, khả năng kiểm thử tốt và kiến trúc mô-đun hóa rõ ràng (Hình \ref{fig:ch1_springboot_logo}). Spring Framework vận hành dựa trên hai nguyên lý thiết kế cốt lõi là Dependency Injection (DI) và Aspect Oriented Programming (AOP), giúp giảm sự phụ thuộc cứng giữa các thành phần và giữ mã nguồn gọn gàng theo mô hình POJO (\textit{Plain Old Java Object}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=3.0cm,keepaspectratio]{spring_boot.png}
+    \caption{Logo nền tảng Spring Boot}
+    \label{fig:ch1_springboot_logo}
+\end{figure}
 
 \subsubsection{Kiến trúc của Spring Framework trong hệ thống}
-Spring được chia thành nhiều module độc lập; trong đồ án này, hệ thống sử dụng các module trọng tâm như minh họa ở Hình \ref{fig:ch1_spring_arch}:
+
+Spring được tổ chức thành nhiều module độc lập. Trong đồ án này, hệ thống sử dụng các thành phần trọng tâm như minh họa ở Hình \ref{fig:ch1_spring_arch}.
 
 \begin{figure}[H]
     \centering
@@ -157,80 +196,106 @@ Spring được chia thành nhiều module độc lập; trong đồ án này, h
     \label{fig:ch1_spring_arch}
 \end{figure}
 
-\begin{itemize}
-    \item \textbf{Spring Core Container:} Quản lý vòng đời đối tượng và cơ chế tiêm phụ thuộc (DI).
-    \item \textbf{Spring Web (MVC):} Xây dựng các RESTful API giao tiếp với ứng dụng React Native và dịch vụ AI FastAPI.
-    \item \textbf{Spring Security:} Bảo vệ hệ thống thông qua xác thực không trạng thái bằng \textbf{JSON Web Token (JWT)} kết hợp đăng nhập \textbf{Google OAuth2}.
-    \item \textbf{Data Access (Spring Data JPA / Hibernate):} Quản lý giao dịch (Transaction) và tương tác với cơ sở dữ liệu PostgreSQL.
-\end{itemize}
+Cụ thể, Spring Core Container đảm nhiệm quản lý vòng đời đối tượng và cơ chế tiêm phụ thuộc (DI); Spring Web (MVC) cung cấp các RESTful API giao tiếp với ứng dụng React Native và dịch vụ AI FastAPI; Spring Security bảo vệ tài nguyên thông qua cơ chế xác thực không trạng thái bằng JSON Web Token (JWT) kết hợp đăng nhập Google OAuth2; còn tầng truy cập dữ liệu Spring Data JPA / Hibernate đảm nhận quản lý giao dịch và tương tác với cơ sở dữ liệu PostgreSQL.
 
 \subsubsection{Ưu điểm và sự phù hợp của Spring Boot với đồ án}
-\textbf{Spring Boot} là module mở rộng của Spring Framework cung cấp tính năng RAD (\textit{Rapid Application Development}), giúp tạo ứng dụng độc lập với máy chủ nhúng (Tomcat) và cơ chế \textit{Auto-Configuration} giảm thiểu cấu hình XML rườm rà. Trong đồ án, Spring Boot đáp ứng tốt các nghiệp vụ phức tạp như tính toán chỉ số BMI/TDEE, quản lý nhật ký bữa ăn/vận động, đồng bộ ngoại tuyến, xử lý bảng xếp hạng thời gian thực và kết nối an toàn tới AI Service.
 
-\subsection{Giới thiệu về PostgreSQL, Spring Data JPA \& Cloud Object Storage}
+Spring Boot là module mở rộng của Spring Framework hỗ trợ phát triển nhanh (RAD -- \textit{Rapid Application Development}) với máy chủ nhúng Tomcat và cơ chế \textit{Auto-Configuration} giúp giảm thiểu cấu hình rườm rà. Trong phạm vi đồ án, Spring Boot đáp ứng hiệu quả các nghiệp vụ phức tạp như tính toán chỉ số BMI/TDEE, quản lý nhật ký bữa ăn và vận động, đồng bộ hàng loạt dữ liệu ngoại tuyến, xử lý bảng xếp hạng thời gian thực và kết nối an toàn tới dịch vụ AI.
+
+\subsection{Giới thiệu về PostgreSQL, Spring Data JPA và Cloud Object Storage}
 \label{sec:1.2.3}
 
-\subsubsection{Lý do chọn}
-Trong đồ án, hệ thống cần lưu trữ dữ liệu có cấu trúc chặt chẽ (tài khoản, hồ sơ sức khỏe, bảng dinh dưỡng món ăn Việt Nam, lịch sử bữa ăn, vận động, streak) và dữ liệu tệp đa phương tiện (ảnh chụp bữa ăn, ảnh đại diện). Nhóm lựa chọn kết hợp \textbf{PostgreSQL}, \textbf{Spring Data JPA} và \textbf{Cloud Object Storage} vì các lý do sau:
-\begin{itemize}
-    \item \textbf{PostgreSQL:} Hệ quản trị cơ sở dữ liệu quan hệ mã nguồn mở mạnh mẽ, tuân thủ đầy đủ tính chất ACID, hỗ trợ đánh chỉ mục (index), kiểu dữ liệu JSON và xử lý hiệu quả các truy vấn thống kê phức tạp theo Ngày/Tuần/Tháng.
-    \item \textbf{Spring Data JPA / Hibernate:} Tự động ánh xạ thực thể (Entity $\leftrightarrow$ Table), giảm đáng kể mã lặp lại (boilerplate code) so với JDBC thuần, đồng thời hỗ trợ sẵn phân trang, sắp xếp và tạo truy vấn từ tên phương thức.
-    \item \textbf{Cloud Object Storage:} Cho phép tải lên, lưu trữ bền vững và phân phối ảnh món ăn qua giao thức HTTPS mà không phụ thuộc vào bộ nhớ cục bộ của máy chủ triển khai.
-\end{itemize}
+\subsubsection{Lý do lựa chọn}
 
-\subsubsection{Phù hợp với đồ án}
-Sự kết hợp này đáp ứng tốt quy mô dữ liệu món ăn Việt Nam (tập VietFood68 và dữ liệu mã vạch), đảm bảo tính toàn vẹn dữ liệu khi đồng bộ nhật ký ngoại tuyến và giúp ảnh món ăn hiển thị nhanh trên ứng dụng di động.
+Hệ thống đòi hỏi lưu trữ đồng thời dữ liệu quan hệ có cấu trúc chặt chẽ (tài khoản, hồ sơ sức khỏe, bảng thành phần dinh dưỡng món ăn Việt Nam, lịch sử bữa ăn, vận động, streak) và tệp đa phương tiện (ảnh chụp bữa ăn, ảnh đại diện). Vì vậy, nhóm lựa chọn kết hợp PostgreSQL, Spring Data JPA và Cloud Object Storage.
 
-\subsection{Giới thiệu về YOLO, ONNX Runtime \& Python FastAPI (AI \& Thị giác máy tính)}
+PostgreSQL là hệ quản trị cơ sở dữ liệu quan hệ mã nguồn mở tuân thủ đầy đủ tính chất ACID, hỗ trợ đánh chỉ mục (index), kiểu dữ liệu JSON và xử lý tốt các truy vấn thống kê tổng hợp theo Ngày, Tuần hoặc Tháng (Hình \ref{fig:ch1_postgresql}). Tầng Spring Data JPA và Hibernate giúp tự động ánh xạ giữa thực thể và bảng dữ liệu (Entity $\leftrightarrow$ Table), giảm đáng kể mã lặp lại so với JDBC thuần và hỗ trợ sẵn phân trang, sắp xếp. Trong khi đó, Cloud Object Storage đảm nhận việc lưu trữ bền vững và phân phối hình ảnh qua HTTPS mà không phụ thuộc vào bộ nhớ cục bộ của máy chủ triển khai.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=2.8cm,keepaspectratio]{postgreSQL.png}
+    \caption{Hệ quản trị cơ sở dữ liệu quan hệ PostgreSQL}
+    \label{fig:ch1_postgresql}
+\end{figure}
+
+\subsubsection{Mức độ phù hợp với đồ án}
+
+Sự kết hợp giữa ba công nghệ này đáp ứng tốt quy mô dữ liệu của tập VietFood68 cùng kho thông tin mã vạch thực phẩm, bảo đảm tính toàn vẹn dữ liệu trong quá trình đồng bộ nhật ký ngoại tuyến và giúp hình ảnh bữa ăn tải nhanh trên thiết bị di động.
+
+\subsection{Giới thiệu về YOLOv11m, ONNX Runtime và Python FastAPI (AI và Thị giác máy tính)}
 \label{sec:1.2.4}
 
-\subsubsection{Tổng quan về YOLO, ONNX và FastAPI}
-\begin{itemize}
-    \item \textbf{YOLO (You Only Look Once):} Là họ mô hình phát hiện đối tượng một giai đoạn (one-stage object detection) nổi tiếng với tốc độ suy luận nhanh và độ chính xác cao, có khả năng định vị và phân loại đồng thời nhiều món ăn xuất hiện trong cùng một bức ảnh.
-    \item \textbf{ONNX / ONNX Runtime:} ONNX (\textit{Open Neural Network Exchange}) là định dạng chuẩn mở để biểu diễn mô hình học sâu, cho phép chuyển đổi mô hình đã huấn luyện sang chạy trên \textbf{ONNX Runtime} với khả năng tối ưu hóa đồ thị tính toán trên cả CPU và GPU.
-    \item \textbf{Python FastAPI:} Là web framework hiện đại của Python có hiệu năng cao (dựa trên Starlette và Pydantic), hỗ trợ xử lý bất đồng bộ (async) và tự động sinh tài liệu OpenAPI.
-\end{itemize}
+\subsubsection{Tổng quan về YOLOv11m, ONNX và FastAPI}
 
-\subsubsection{Phù hợp với đồ án}
-Trong đồ án, mô hình YOLO được huấn luyện trực tiếp trên tập dữ liệu món ăn Việt Nam \textbf{VietFood68}, xuất sang chuẩn ONNX và đóng gói trong dịch vụ \textbf{FastAPI}. Cách kiến trúc này giúp đội ngũ phát triển làm chủ hoàn toàn pipeline nhận diện món ăn, tính toán khẩu phần, tra cứu calo/macro và trả kết quả JSON độc lập mà không phụ thuộc vào bất kỳ API AI trả phí nào từ bên thứ ba.
+YOLO (\textit{You Only Look Once}) là họ mô hình phát hiện đối tượng một giai đoạn nổi bật với tốc độ suy luận nhanh và độ chính xác cao, cho phép định vị và phân loại đồng thời nhiều món ăn xuất hiện trong cùng một bức ảnh. Trong đồ án, phiên bản YOLOv11m (Hình \ref{fig:ch1_yolov11}) được lựa chọn nhằm cân bằng tốt giữa độ chính xác nhận diện các món ăn Việt Nam có nhiều chi tiết tương đồng và thời gian phản hồi trên phần cứng phổ thông.
 
-\subsection{Giới thiệu về WebSocket, FCM \& Expo Notifications}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth,keepaspectratio]{yolov11.png}
+    \caption{Kiến trúc tổng quan và các tác vụ của họ mô hình YOLOv11}
+    \label{fig:ch1_yolov11}
+\end{figure}
+
+ONNX (\textit{Open Neural Network Exchange}) là định dạng chuẩn mở dùng để biểu diễn mô hình học sâu, cho phép chuyển đổi mô hình đã huấn luyện sang chạy trên ONNX Runtime với khả năng tối ưu hóa đồ thị tính toán trên cả CPU và GPU (Hình \ref{fig:ch1_onnx}). Để cung cấp mô hình này dưới dạng dịch vụ web hiệu năng cao, nhóm sử dụng Python FastAPI -- framework hiện đại xây dựng trên Starlette và Pydantic, hỗ trợ xử lý bất đồng bộ (async) và tự động sinh tài liệu OpenAPI.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth,keepaspectratio]{onnx.png}
+    \caption{Quy trình chuyển đổi và triển khai suy luận mô hình với ONNX}
+    \label{fig:ch1_onnx}
+\end{figure}
+
+\subsubsection{Mức độ phù hợp với đồ án}
+
+Trong hệ thống, mô hình YOLOv11m được huấn luyện trực tiếp trên tập dữ liệu món ăn Việt Nam VietFood68, xuất sang định dạng ONNX và đóng gói bên trong dịch vụ FastAPI. Kiến trúc tách biệt này giúp đội ngũ phát triển làm chủ hoàn toàn pipeline nhận diện món ăn, tính toán khẩu phần, tra cứu calo/macro và trả kết quả JSON độc lập, không phụ thuộc vào các dịch vụ API AI trả phí từ bên thứ ba.
+
+\subsection{Giới thiệu về WebSocket, FCM và Expo Notifications}
 \label{sec:1.2.5}
 
-\begin{itemize}
-    \item \textbf{WebSocket:} Giao thức truyền thông hai chiều (full-duplex) trên một kết nối TCP duy nhất, cho phép máy chủ chủ động đẩy dữ liệu xuống ứng dụng di động tức thì. Trong đồ án, WebSocket được sử dụng cho tính năng \textbf{bảng xếp hạng bạn bè thời gian thực} và tương tác phản hồi nhanh với \textbf{Chatbot AI}.
-    \item \textbf{Firebase Cloud Messaging (FCM) \& Expo Notifications:} Giải pháp gửi thông báo đẩy (push notification) đa nền tảng tin cậy và miễn phí, giúp hệ thống gửi \textbf{nhắc nhở thông minh} (uống nước định kỳ, ghi nhật ký bữa ăn, cảnh báo vượt ngưỡng calo) ngay cả khi ứng dụng đang chạy nền.
-\end{itemize}
+WebSocket là giao thức truyền thông hai chiều (full-duplex) trên một kết nối TCP duy nhất, cho phép máy chủ chủ động đẩy dữ liệu xuống ứng dụng di động tức thì. Trong đồ án, WebSocket được sử dụng để cập nhật bảng xếp hạng bạn bè theo thời gian thực và hỗ trợ phản hồi nhanh trong quá trình trò chuyện với Chatbot AI.
+
+Bên cạnh đó, Firebase Cloud Messaging (FCM) kết hợp với Expo Notifications cung cấp giải pháp gửi thông báo đẩy đa nền tảng tin cậy và miễn phí, giúp ứng dụng gửi các nhắc nhở thông minh (uống nước định kỳ, ghi nhật ký bữa ăn, cảnh báo vượt ngưỡng calo) ngay cả khi ứng dụng không mở ở màn hình chính.
 
 \subsection{Giới thiệu về Docker}
 \label{sec:1.2.6}
 
 \subsubsection{Docker và Containerization}
-\textbf{Docker} là nền tảng mã nguồn mở cho phép đóng gói mã nguồn ứng dụng cùng toàn bộ thư viện, tệp cấu hình và phụ thuộc vào một đơn vị nhẹ gọi là \textit{Container}. Khác với máy ảo truyền thống (VM), container chia sẻ nhân hệ điều hành chủ nên khởi động chỉ trong vài giây, tiêu tốn ít tài nguyên và đảm bảo tính nhất quán môi trường từ máy phát triển đến máy chủ vận hành.
+
+Docker (Hình \ref{fig:ch1_docker_logo}) là nền tảng mã nguồn mở cho phép đóng gói mã nguồn ứng dụng cùng toàn bộ thư viện, tệp cấu hình và các gói phụ thuộc vào một đơn vị thực thi nhẹ gọi là \textit{Container}. Khác với máy ảo truyền thống (VM), container chia sẻ nhân hệ điều hành chủ nên khởi động nhanh, tiêu tốn ít tài nguyên và bảo đảm tính nhất quán môi trường từ giai đoạn phát triển đến vận hành thực tế, theo quy trình minh họa ở Hình \ref{fig:ch1_docker}.
 
 \begin{figure}[H]
     \centering
+    \includegraphics[height=2.8cm,keepaspectratio]{docker.png}
+    \caption{Logo nền tảng container hóa Docker}
+    \label{fig:ch1_docker_logo}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \resizebox{0.92\textwidth}{!}{%
     \begin{tikzpicture}[
-        box/.style={draw=primary, rounded corners, fill=primary!10, minimum width=3.1cm, minimum height=1.1cm, align=center, font=\small\bfseries},
+        box/.style={draw=primary, rounded corners, fill=primary!10, minimum width=3.4cm, minimum height=1.15cm, align=center, font=\small\bfseries},
         arrow/.style={->, thick, color=primary}
     ]
         \node[box] (df) at (0, 0) {Dockerfile\\(Kịch bản cấu hình)};
-        \node[box] (img) at (4.8, 0) {Docker Image\\(Bản đóng gói bất biến)};
-        \node[box] (cnt) at (9.6, 0) {Docker Container\\(Tiến trình thực thi)};
+        \node[box] (img) at (5.4, 0) {Docker Image\\(Bản đóng gói bất biến)};
+        \node[box] (cnt) at (10.8, 0) {Docker Container\\(Tiến trình thực thi)};
 
         \draw[arrow] (df) -- node[above, font=\scriptsize\bfseries] {Build} (img);
         \draw[arrow] (img) -- node[above, font=\scriptsize\bfseries] {Run} (cnt);
-    \end{tikzpicture}
+    \end{tikzpicture}%
+    }
     \caption{Quy trình đóng gói và chạy dịch vụ bằng Docker}
     \label{fig:ch1_docker}
 \end{figure}
 
 \subsubsection{Vai trò của Docker trong dự án}
-Thông qua \texttt{Dockerfile} và \texttt{docker-compose}, nhóm phát triển có thể khởi chạy đồng bộ toàn bộ hệ sinh thái dịch vụ gồm Backend Spring Boot, AI Service FastAPI (ONNX Runtime) và cơ sở dữ liệu PostgreSQL trên một môi trường thống nhất, loại bỏ xung đột phiên bản thư viện và sẵn sàng cho triển khai thực tế.
+
+Thông qua \textit{Dockerfile} và \textit{docker-compose}, nhóm phát triển có thể khởi chạy đồng bộ toàn bộ hệ sinh thái dịch vụ gồm Backend Spring Boot, AI Service FastAPI (ONNX Runtime) và cơ sở dữ liệu PostgreSQL trên một môi trường thống nhất, loại bỏ xung đột phiên bản thư viện và sẵn sàng cho việc triển khai thực tế.
 
 \section{Kết luận chương 1}
 \label{sec:1.3}
 
-Trong chương này, đồ án đã trình bày tổng quan về bài toán theo dõi và quản lý dinh dưỡng cá nhân, khảo sát một số ứng dụng thực tế (Food Visor, Wao, Snap Calorie) nhằm chỉ ra khoảng trống về hỗ trợ ẩm thực Việt Nam và cá nhân hóa toàn diện. Trên cơ sở đó, chương đã xác định mục tiêu, 7 nhóm chức năng cốt lõi và hệ sinh thái công nghệ lựa chọn gồm React Native/Expo, Spring Boot, PostgreSQL, YOLO + ONNX Runtime + FastAPI, WebSocket, FCM và Docker. Đây là nền tảng vững chắc cho việc xây dựng mô hình AI và phân tích, thiết kế hệ thống ở các chương tiếp theo.
+Trong chương này, đồ án đã trình bày tổng quan về bài toán hỗ trợ chăm sóc sức khỏe và dinh dưỡng cá nhân tích hợp AI, khảo sát một số ứng dụng thực tế (Food Visor, Wao, Snap Calorie) nhằm chỉ ra khoảng trống trong hỗ trợ ẩm thực Việt Nam và tư vấn cá nhân hóa toàn diện. Trên cơ sở đó, chương đã xác định mục tiêu, 7 nhóm chức năng cốt lõi cùng hệ sinh thái công nghệ lựa chọn gồm React Native/Expo, Spring Boot, PostgreSQL, YOLOv11m + ONNX Runtime + FastAPI, WebSocket, FCM và Docker. Đây là nền tảng kỹ thuật cho việc xây dựng mô hình nhận diện món ăn và phân tích, thiết kế hệ thống ở các chương tiếp theo.
 
 \end{document}
