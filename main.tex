@@ -17,6 +17,7 @@
 \usepackage{amsbsy} % Hỗ trợ các kí hiệu in đậm
 \usepackage{times} % Chọn font Time New Romans
 \usepackage{array} % Tạo bảng array
+\usepackage{longtable} % Hỗ trợ bảng dài nhiều trang
 \usepackage{enumitem} % Cho phép thay đổi kí hiệu của list
 \usepackage{subfiles} % Chèn các file nhỏ, giúp chia các chapter ra nhiều file hơn
 \usepackage{titlesec} % Giúp chỉnh sửa các tiêu đề, đề mục như chương, phần,..
@@ -302,14 +303,14 @@
 \subfile{chapter/1_introduction} % Chương 1: Cơ sở lý thuyết
 
 \newpage
-\chapter{XÂY DỰNG MÔ HÌNH NHẬN DIỆN MÓN ĂN VIỆT NAM TỪ ẢNH BẰNG YOLOV11M}
-\label{chapter:Model_building}
-\subfile{chapter/2_architecture} % Chương 2: Xây dựng mô hình
-
-\newpage
 \chapter{PHÂN TÍCH, THIẾT KẾ HỆ THỐNG}
 \label{chapter:System_analysis_design}
-\subfile{chapter/3_ai_service} % Chương 3: Phân tích, thiết kế hệ thống
+\subfile{chapter/2_phan_tich_thiet_ke_he_thong.tex} % Chương 2: Phân tích, thiết kế hệ thống
+
+\newpage
+\chapter{XÂY DỰNG MÔ HÌNH NHẬN DIỆN MÓN ĂN VIỆT NAM TỪ ẢNH BẰNG YOLOV11M}
+\label{chapter:Model_building}
+\subfile{chapter/2_architecture} % Chương 3: Xây dựng mô hình
 
 \newpage
 \chapter{CÀI ĐẶT HỆ THỐNG}
