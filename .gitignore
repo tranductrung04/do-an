@@ -1,0 +1,59 @@
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.dvi
+*.fdb_latexmk
+*.fls
+*.glg
+*.glo
+*.gls
+*.glsdefs
+*.idx
+*.ilg
+*.ind
+*.ist
+*.lof
+*.log
+*.lot
+*.nav
+*.out
+*.pdfsync
+*.run.xml
+*.snm
+*.synctex.gz
+*.toc
+*.vrb
+*.xdv
+*.xdy
+main-blx.bib
+main.run.xml
+
+# Generated PDFs from the main document
+main.pdf
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Python virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Editor and local tool settings
+.vscode/
+.idea/
+.claude/settings.local.json
+.omc/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini

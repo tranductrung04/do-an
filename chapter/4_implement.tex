@@ -1,0 +1,115 @@
+\documentclass[../main.tex]{subfiles}
+\begin{document}
+
+Chương này trình bày quá trình cài đặt và triển khai hệ thống ứng dụng hỗ trợ chăm sóc sức khỏe và dinh dưỡng tích hợp AI dựa trên các thiết kế ở Chương 3. Nội dung bao gồm thiết lập môi trường và công nghệ cài đặt, triển khai dịch vụ AI nhận diện món ăn và ước lượng calo (Python FastAPI + ONNX Runtime), cài đặt Backend chính (Java Spring Boot), phát triển ứng dụng di động (TypeScript, React Native, Expo), tích hợp thông báo thời gian thực và kiểm thử hệ thống.
+
+\section{Môi trường và công nghệ cài đặt}
+\label{sec:4.1}
+
+Hệ thống được xây dựng theo kiến trúc tách biệt Frontend di động, Backend nghiệp vụ và AI Inference Service, giúp tối ưu hiệu năng và thuận tiện cho việc đóng gói triển khai bằng Docker. Bảng \ref{tab:ch4_environment} tổng hợp các công nghệ và thư viện sử dụng thực tế trong dự án.
+
+\begin{table}[H]
+    \centering
+    \caption{Tổng hợp công nghệ cài đặt hệ thống}
+    \label{tab:ch4_environment}
+    \arrayrulecolor{primary}
+    \rowcolors{2}{primary!10}{white}
+    \begin{tabular}{|p{0.22\textwidth}|p{0.34\textwidth}|p{0.34\textwidth}|}
+        \hline
+        \rowcolor{primary!35}
+        \textbf{Thành phần} & \textbf{Công nghệ / Thư viện} & \textbf{Vai trò} \\
+        \hline
+        Frontend Mobile & TypeScript, React Native, Expo & Xây dựng ứng dụng di động đa nền tảng Android/iOS. \\
+        \hline
+        State \& Biểu đồ & React Navigation, Zustand / Redux Toolkit, React Query, Victory / Recharts Native & Điều hướng, quản lý trạng thái, caching API, hỗ trợ offline và vẽ biểu đồ. \\
+        \hline
+        Cảm biến \& Sức khỏe & \texttt{expo-sensors}, \texttt{expo-location}, \texttt{vision-camera-code-scanner}, \texttt{react-native-health-connect} / \texttt{react-native-health} & Quét mã vạch sản phẩm, theo dõi vận động và đồng bộ Google Fit / Apple Health. \\
+        \hline
+        Backend chính & Java, Spring Boot, Spring Security (JWT + Google OAuth2), Spring Data JPA / Hibernate & Xử lý nghiệp vụ, xác thực bảo mật, tương tác dữ liệu và cung cấp REST API. \\
+        \hline
+        Cơ sở dữ liệu & PostgreSQL, Cloud Object Storage & Lưu trữ dữ liệu quan hệ và tệp ảnh món ăn, ảnh đại diện. \\
+        \hline
+        AI Service & Python, FastAPI, YOLO (VietFood68), ONNX / ONNX Runtime & Nhận diện món ăn Việt Nam, tính khẩu phần, tra cứu dinh dưỡng và trả JSON. \\
+        \hline
+        Thời gian thực \& Push & WebSocket, Firebase Cloud Messaging (FCM), Expo Notifications & Bảng xếp hạng thời gian thực, Chatbot AI và thông báo nhắc nhở thông minh. \\
+        \hline
+    \end{tabular}
+    \arrayrulecolor{black}
+    \rowcolors{2}{}{}
+\end{table}
+
+\section{Cài đặt AI Service (Python FastAPI + ONNX Runtime)}
+\label{sec:4.2}
+
+Dịch vụ AI được cài đặt độc lập bằng Python và FastAPI nhằm đóng gói pipeline nhận diện món ăn Việt Nam mà không phụ thuộc vào các dịch vụ API bên thứ ba:
+\begin{itemize}
+    \item \textbf{Nạp mô hình ONNX:} Khi dịch vụ FastAPI khởi động, trọng số mô hình YOLO (đã huấn luyện trên tập VietFood68 và xuất sang định dạng \texttt{.onnx}) được nạp một lần duy nhất vào \texttt{onnxruntime.InferenceSession}, giúp giảm độ trễ cho từng yêu cầu nhận diện.
+    \item \textbf{Tiền xử lý và hậu xử lý ảnh:} Ảnh đầu vào được chuẩn hóa kích thước, chuyển đổi không gian màu RGB và chuẩn hóa tensor trước khi đưa vào mô hình. Kết quả đầu ra được áp dụng Non-Maximum Suppression (NMS) để lọc các khung dự đoán trùng lặp.
+    \item \textbf{Tính toán khẩu phần và tra cứu dinh dưỡng:} Từ danh sách nhãn món ăn nhận diện được, dịch vụ đối chiếu với cơ sở dữ liệu dinh dưỡng Việt Nam để ước lượng calo và các chỉ số macro (protein, carbs, fat), trả về định dạng JSON chuẩn cho Backend Spring Boot.
+    \item \textbf{Module Trợ lý AI:} Cung cấp các endpoint phục vụ gợi ý thực đơn cá nhân hóa (theo mục tiêu calo, dị ứng, ngân sách) và Chatbot tư vấn dinh dưỡng dựa trên lịch sử ăn uống của người dùng.
+\end{itemize}
+
+\section{Cài đặt Backend chính (Java Spring Boot \& PostgreSQL)}
+\label{sec:4.3}
+
+Backend chính được tổ chức theo kiến trúc phân lớp (\texttt{controller}, \texttt{service}, \texttt{repository}, \texttt{entity}, \texttt{security}) với các module trọng tâm:
+\begin{enumerate}
+    \item \textbf{Xác thực và phân quyền:} Cài đặt bộ lọc \texttt{JwtAuthenticationFilter} trong Spring Security để xác thực JWT token ở mọi request, kết hợp luồng đăng nhập Google OAuth2 và chức năng khôi phục mật khẩu qua email.
+    \item \textbf{Tính toán chỉ số sức khỏe và dinh dưỡng:} Tự động tính chỉ số BMI, TDEE dựa trên chiều cao, cân nặng, tuổi, giới tính, mức độ vận động và thiết lập mục tiêu calo hằng ngày kèm danh sách thực phẩm dị ứng cần loại trừ.
+    \item \textbf{Quản lý nhật ký bữa ăn, vận động và đồng bộ ngoại tuyến:} Cung cấp API ghi nhận bữa ăn (Sáng, Trưa, Tối, Bữa phụ), tạo món tùy chỉnh, tra cứu mã vạch, đồng bộ dữ liệu tập luyện và hỗ trợ API đồng bộ hàng loạt (\texttt{batch sync}) cho dữ liệu tạo ở chế độ ngoại tuyến.
+    \item \textbf{Streak, huy hiệu, WebSocket và FCM:} Tự động kiểm tra điều kiện hoàn thành mục tiêu hằng ngày để tăng chuỗi streak, mở khóa huy hiệu, phát sự kiện cập nhật bảng xếp hạng bạn bè qua WebSocket và lên lịch gửi thông báo đẩy nhắc uống nước, ghi log hoặc cảnh báo vượt calo qua Firebase Cloud Messaging (FCM).
+\end{enumerate}
+
+\section{Cài đặt Frontend Mobile (React Native \& Expo)}
+\label{sec:4.4}
+
+Ứng dụng di động được phát triển bằng TypeScript trên nền tảng React Native và Expo, đảm bảo giao diện trực quan và hoạt động mượt mà trên cả Android lẫn iOS:
+\begin{itemize}
+    \item \textbf{Quản lý dữ liệu và hỗ trợ ngoại tuyến:} Sử dụng \textbf{Zustand / Redux Toolkit} kết hợp \textbf{React Query} để lưu trữ trạng thái phiên đăng nhập, cache dữ liệu món ăn và xếp hàng các bản ghi nhật ký khi người dùng ngoại tuyến, tự động đồng bộ lại khi thiết bị có kết nối mạng.
+    \item \textbf{Camera AI và quét mã vạch:} Tích hợp camera chụp ảnh món ăn gửi nhận diện AI và sử dụng \texttt{vision-camera-code-scanner} để quét nhanh mã vạch trên bao bì thực phẩm đóng gói.
+    \item \textbf{Đồng bộ sức khỏe và cảm biến:} Tích hợp \texttt{react-native-health-connect} (Android), \texttt{react-native-health} (iOS) cùng \texttt{expo-sensors} và \texttt{expo-location} để đồng bộ bước chân, nhịp tim và ghi nhận hoạt động vận động.
+    \item \textbf{Dashboard và biểu đồ thống kê:} Sử dụng \textbf{Victory / Recharts Native} để hiển thị tiến độ calo, tỷ lệ macro, lượng nước uống theo thời gian thực, biểu đồ theo Ngày/Tuần/Tháng và đường dự đoán xu hướng cân nặng.
+\end{itemize}
+
+\section{Kiểm thử và đánh giá hệ thống}
+\label{sec:4.5}
+
+\subsection{Kiểm thử chức năng và tích hợp}
+
+Hệ thống được kiểm thử đồng bộ giữa ứng dụng di động React Native, Backend Spring Boot, AI Service FastAPI và cơ sở dữ liệu PostgreSQL qua các kịch bản thực tế như Bảng \ref{tab:ch4_testcases}.
+
+\begin{table}[H]
+    \centering
+    \caption{Tổng hợp các kịch bản kiểm thử hệ thống}
+    \label{tab:ch4_testcases}
+    \arrayrulecolor{primary}
+    \rowcolors{2}{primary!10}{white}
+    \begin{tabular}{|p{0.11\textwidth}|p{0.25\textwidth}|p{0.32\textwidth}|p{0.22\textwidth}|}
+        \hline
+        \rowcolor{primary!35}
+        \textbf{Mã TC} & \textbf{Chức năng} & \textbf{Kịch bản kiểm thử} & \textbf{Kết quả đạt được} \\
+        \hline
+        TC-01 & Xác thực & Đăng ký, đăng nhập bằng Email và Google OAuth2. & Cấp JWT hợp lệ, đăng nhập thành công. \\
+        \hline
+        TC-02 & Hồ sơ sức khỏe & Nhập thể trạng, dị ứng và mục tiêu cân nặng. & Tính đúng BMI, TDEE và calo mục tiêu. \\
+        \hline
+        TC-03 & Nhận diện AI & Chụp ảnh món ăn Việt Nam gửi qua FastAPI (ONNX). & Nhận diện đúng món, trả về calo/macro dưới 1.5s. \\
+        \hline
+        TC-04 & Quét mã vạch & Quét mã vạch sản phẩm đóng gói bằng camera. & Truy xuất đúng thông tin dinh dưỡng sản phẩm. \\
+        \hline
+        TC-05 & Đồng bộ sức khỏe & Đồng bộ bước chân, nhịp tim từ Google Fit / Apple Health. & Cập nhật đúng calo tiêu hao lên Dashboard. \\
+        \hline
+        TC-06 & Offline \& Đồng bộ & Ghi nhật ký bữa ăn khi tắt mạng, sau đó bật lại mạng. & Lưu cục bộ an toàn và tự động đồng bộ lên server. \\
+        \hline
+        TC-07 & Thời gian thực \& Push & Hoàn thành mục tiêu ngày và kiểm tra bảng xếp hạng, FCM. & Tăng streak, cập nhật bảng xếp hạng qua WebSocket và nhận thông báo FCM. \\
+        \hline
+    \end{tabular}
+    \arrayrulecolor{black}
+    \rowcolors{2}{}{}
+\end{table}
+
+\subsection{Kết luận chương 4}
+
+Hệ thống đã được cài đặt hoàn chỉnh theo đúng kiến trúc thiết kế, kết hợp thành công ứng dụng di động React Native/Expo, Backend Spring Boot bảo mật bằng JWT/Google OAuth2, cơ sở dữ liệu PostgreSQL và dịch vụ AI độc lập chạy mô hình ONNX trên FastAPI. Các chức năng cốt lõi từ nhận diện món ăn Việt Nam, gợi ý thực đơn, Chatbot AI, đồng bộ vận động đến hệ thống streak và hoạt động ngoại tuyến đều vận hành ổn định, đáp ứng tốt mục tiêu hỗ trợ chăm sóc sức khỏe và dinh dưỡng cá nhân hóa.
+
+\end{document}

@@ -1,0 +1,255 @@
+\documentclass[../main.tex]{subfiles}
+\begin{document}
+
+Chương này trình bày chi tiết quá trình xây dựng mô hình phát hiện và nhận diện món ăn Việt Nam từ hình ảnh bằng kiến trúc \textbf{YOLOv11m} trên bộ dữ liệu \textbf{VietFood68} (68 lớp món ăn), bao gồm khâu thu thập, gán nhãn, tiền xử lý và tăng cường dữ liệu, lựa chọn kiến trúc, quy trình huấn luyện, phương pháp đánh giá, cũng như cách xuất mô hình sang \textbf{ONNX} để tích hợp vào dịch vụ AI (FastAPI) và thiết kế cơ sở dữ liệu ban đầu cho ứng dụng.
+
+\section{Giới thiệu về nhiệm vụ nhận diện món ăn từ ảnh}
+\label{sec:2.1}
+
+Nhận diện món ăn từ ảnh là bài toán cốt lõi trong ứng dụng hỗ trợ chăm sóc sức khỏe và dinh dưỡng cá nhân, giúp người dùng chỉ cần chụp hoặc tải ảnh bữa ăn thay vì phải tìm kiếm hay nhập liệu thủ công từng món. Khi hệ thống tự động nhận diện được món ăn, tra cứu bảng thành phần dinh dưỡng và ghi nhận vào nhật ký ăn uống, trải nghiệm người dùng được tối ưu hóa đáng kể và độ chính xác dữ liệu dinh dưỡng cũng được nâng cao.
+
+Khác với bài toán phân loại ảnh đơn nhãn (Image Classification -- chỉ gán một nhãn cho toàn ảnh), bữa ăn của người Việt thường có nhiều món đặt chung trên cùng một mâm cơm hoặc bàn ăn (ví dụ: cơm tấm kèm sườn nướng, bì, chả, canh chua và nước chấm). Vì vậy, đồ án lựa chọn tiếp cận theo bài toán \textbf{phát hiện đối tượng (Object Detection)} để vừa định vị chính xác từng món ăn bằng khung bao (bounding box), vừa phân loại đồng thời nhiều món trong cùng một khung hình.
+
+Cụ thể, đề tài huấn luyện mô hình \textbf{YOLOv11m} trên tập dữ liệu \textbf{VietFood68} gồm \textbf{68 lớp món ăn Việt Nam} phổ biến, kết hợp bảng dữ liệu dinh dưỡng (calo, Protein, Carbs, Fat) theo từng món nhằm xây dựng pipeline nhận diện và ước lượng calo độc lập, không phụ thuộc vào dịch vụ API bên thứ ba.
+
+\section{Thu thập và tiền xử lý dữ liệu}
+\label{sec:2.2}
+
+\subsection{Nguồn dữ liệu và tập VietFood68}
+
+Bộ dữ liệu huấn luyện sử dụng tập \textbf{VietFood68} gồm \textbf{68 lớp món ăn Việt Nam} đa dạng, đại diện cho các nhóm ẩm thực quen thuộc trong bữa ăn hằng ngày của người Việt (Bảng \ref{tab:ch2_vietfood68_groups}). Ngoài nguồn ảnh mở, dữ liệu được rà soát, loại bỏ ảnh mờ nhiễu, sai nhãn và bổ sung ảnh chụp thực tế ở nhiều góc độ, điều kiện ánh sáng khác nhau để tăng tính tổng quát.
+
+\begin{table}[H]
+    \centering
+    \caption{Phân nhóm 68 lớp món ăn Việt Nam trong tập dữ liệu VietFood68}
+    \label{tab:ch2_vietfood68_groups}
+    \arrayrulecolor{primary}
+    \rowcolors{2}{primary!10}{white}
+    \begin{tabular}{|p{0.26\textwidth}|p{0.64\textwidth}|}
+        \hline
+        \rowcolor{primary!35}
+        \textbf{Nhóm món ăn} & \textbf{Một số món ăn tiêu biểu trong VietFood68} \\
+        \hline
+        Món nước & Phở bò, Phở gà, Bún bò Huế, Bún riêu cua, Bún mắm, Hủ tiếu, Mì Quảng, Cao lầu, Bánh canh, Cháo lòng, Canh chua, Miến lươn. \\
+        \hline
+        Món cơm \& Xôi & Cơm tấm, Cơm chiên dương châu, Cơm gà xối mỡ, Xôi xéo, Xôi gấc, Xôi mặn, Cơm cháy kho quẹt. \\
+        \hline
+        Món cuốn \& Món khô & Bánh mì, Bánh cuốn, Gỏi cuốn, Chả giò (Nem rán), Bún chả, Bún đậu mắm tôm, Bún thịt nướng, Phở cuốn, Bò bía. \\
+        \hline
+        Các loại bánh truyền thống & Bánh xèo, Bánh khọt, Bánh bèo, Bánh bột lọc, Bánh nậm, Bánh chưng, Bánh tét, Bánh giò, Bánh đúc, Bánh ít, Bánh pía. \\
+        \hline
+        Món mặn, Tráng miệng \& Đồ uống & Cá kho tộ, Thịt kho tàu, Nem chua, Gà luộc, Đậu hũ nhồi thịt, Chè ba màu, Chè bưởi, Bánh flan, Cà phê sữa đá. \\
+        \hline
+    \end{tabular}
+    \arrayrulecolor{black}
+    \rowcolors{2}{}{}
+\end{table}
+
+Song song với tập ảnh, nhóm xây dựng \textbf{bảng dữ liệu dinh dưỡng} chuẩn hóa cho toàn bộ 68 lớp món ăn. Mỗi món ăn được gắn với các chỉ số gồm: tên tiếng Việt, mã lớp (\texttt{class\_label}), định lượng khẩu phần chuẩn (1 tô, 1 đĩa, 1 phần hoặc 100g), năng lượng (\texttt{calories}), chất đạm (\texttt{protein}), tinh bột (\texttt{carbs}) và chất béo (\texttt{fat}).
+
+\subsection{Cấu trúc dữ liệu và gán nhãn}
+
+Mỗi ảnh trong tập VietFood68 được gán nhãn khung bao theo định dạng chuẩn YOLO. Tệp nhãn \texttt{.txt} trùng tên với tệp ảnh chứa danh sách các đối tượng xuất hiện trong ảnh, mỗi dòng biểu diễn một món ăn theo định dạng:
+\begin{equation}
+    \langle \text{class\_id} \rangle \quad \langle x_{\text{center}} \rangle \quad \langle y_{\text{center}} \rangle \quad \langle \text{width} \rangle \quad \langle \text{height} \rangle
+\end{equation}
+trong đó $\text{class\_id} \in \{0, 1, \dots, 67\}$ là chỉ số lớp món ăn, còn $(x_{\text{center}}, y_{\text{center}}, \text{width}, \text{height})$ là tọa độ tâm và kích thước khung bao đã chuẩn hóa về đoạn $[0, 1]$ theo chiều rộng và chiều cao ảnh.
+
+Cấu trúc thư mục dữ liệu huấn luyện được tổ chức rõ ràng theo các tập con độc lập gồm \textbf{Train (75\%)}, \textbf{Validation (15\%)} và \textbf{Test (10\%)}:
+\begin{verbatim}
+vietfood68/
+|-- data.yaml              # Khai bao duong dan va 68 ten lop
+|-- images/
+|   |-- train/             # Anh huan luyen
+|   |-- val/               # Anh kiem dinh
+|   +-- test/              # Anh kiem thu doc lap
++-- labels/
+    |-- train/             # Nhan YOLO (.txt) tuong ung tap train
+    |-- val/               # Nhan YOLO (.txt) tuong ung tap val
+    +-- test/              # Nhan YOLO (.txt) tuong ung tap test
+\end{verbatim}
+
+\subsection{Tiền xử lý và tăng cường dữ liệu (Data Augmentation)}
+
+Ảnh món ăn chụp từ điện thoại người dùng có độ phân giải, tỷ lệ khung hình và điều kiện ánh sáng rất khác nhau. Trước khi đưa vào mạng YOLOv11m, dữ liệu được tiền xử lý và tăng cường mạnh mẽ nhằm tránh hiện tượng quá khớp (overfitting):
+\begin{itemize}
+    \item \textbf{Chuẩn hóa kích thước đầu vào:} Toàn bộ ảnh được đưa về kích thước chuẩn $640 \times 640 \times 3$ theo phương pháp \textit{Letterbox Resize} (giữ nguyên tỷ lệ khung hình gốc và chèn viền xám ở phần dư để không làm biến dạng hình dáng món ăn), đồng thời chuẩn hóa giá trị điểm ảnh về $[0, 1]$.
+    \item \textbf{Mosaic Augmentation:} Ghép 4 ảnh ngẫu nhiên thành một bức ảnh tổng hợp trong quá trình huấn luyện, giúp mô hình học cách phát hiện đồng thời nhiều món ăn ở các kích thước nhỏ và vị trí bất kỳ trên bàn ăn.
+    \item \textbf{Biến đổi hình học:} Áp dụng xoay ngẫu nhiên ($\pm 10^\circ$), dịch chuyển ngang/dọc ($10\%$), phóng to/thu nhỏ ($50\%$) và lật ngang ngẫu nhiên (\texttt{fliplr = 0.5}).
+    \item \textbf{Biến đổi không gian màu HSV:} Điều chỉnh ngẫu nhiên sắc độ (\texttt{hsv\_h}), độ bão hòa (\texttt{hsv\_s}) và độ sáng (\texttt{hsv\_v}) nhằm mô phỏng ánh sáng đèn vàng quán ăn, ánh sáng ban ngày hoặc môi trường thiếu sáng.
+\end{itemize}
+
+\section{Lựa chọn mô hình và kiến trúc YOLOv11m}
+\label{sec:2.3}
+
+\subsection{Lý do chọn YOLOv11m}
+
+Trong số các kiến trúc thị giác máy tính hiện nay, đồ án lựa chọn \textbf{YOLOv11m} (phiên bản Medium thuộc thế hệ YOLOv11) làm mô hình nhận diện món ăn Việt Nam dựa trên các tiêu chí sau:
+\begin{itemize}
+    \item \textbf{Khả năng phát hiện đa món ăn trong một ảnh:} Một bữa cơm Việt Nam thường có 2--4 món ăn đặt cạnh nhau. YOLOv11m phát hiện và khoanh vùng chính xác từng món trong một lần suy luận duy nhất, thay vì chỉ đoán 1 món đại diện như các mô hình phân loại ảnh truyền thống.
+    \item \textbf{Cân bằng tối ưu giữa độ chính xác và tốc độ:} So với các biến thể nhẹ hơn (\texttt{YOLOv11n}, \texttt{YOLOv11s}), phiên bản \texttt{YOLOv11m} có độ sâu và số kênh đặc trưng lớn hơn, giúp phân biệt tốt hơn các món ăn có độ tương đồng cao (như Phở bò, Hủ tiếu và Bún bò Huế) trong khi vẫn giữ chi phí tính toán hợp lý hơn nhiều so với \texttt{YOLOv11l/x}.
+    \item \textbf{Tối ưu triển khai độc lập qua ONNX:} YOLOv11m hỗ trợ xuất trực tiếp sang định dạng chuẩn \textbf{ONNX}, cho phép chạy suy luận hiệu năng cao trên \textbf{ONNX Runtime} bên trong dịch vụ FastAPI mà không cần phụ thuộc vào framework huấn luyện.
+\end{itemize}
+
+\subsection{Kiến trúc mạng YOLOv11m và Transfer Learning}
+
+Kiến trúc YOLOv11m gồm ba khối chính phối hợp chặt chẽ (Hình \ref{fig:ch2_yolov11_arch}):
+\begin{enumerate}
+    \item \textbf{Backbone (Trích xuất đặc trưng):} Sử dụng các khối \textbf{C3k2} (tối ưu luồng gradient và giảm tham số) kết hợp khối \textbf{SPPF} (Spatial Pyramid Pooling -- Fast) và khối chú ý không gian \textbf{C2PSA} (Cross Stage Partial with Spatial Attention) ở tầng sâu, giúp mạng tập trung vào các vùng đặc trưng quan trọng của món ăn (như sợi bún, màu nước dùng, topping thịt/rau).
+    \item \textbf{Neck (Tổng hợp đặc trưng đa tỷ lệ):} Kết hợp mạng kim tự tháp đặc trưng \textbf{FPN + PAN} truyền thông tin ngữ nghĩa từ tầng sâu xuống tầng nông và truyền thông tin định vị từ tầng nông lên tầng sâu, giúp phát hiện tốt cả món ăn chiếm diện tích lớn lẫn món phụ kích thước nhỏ.
+    \item \textbf{Head (Anchor-free Decoupled Head):} Tách biệt hai nhánh dự đoán độc lập là nhánh hồi quy khung bao (Bounding Box) và nhánh phân loại 68 lớp món ăn theo cơ chế không neo (anchor-free).
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \resizebox{0.98\textwidth}{!}{%
+    \begin{tikzpicture}[
+        box/.style={draw=primary, rounded corners, fill=primary!10, minimum width=2.5cm, minimum height=1.25cm, align=center, font=\small},
+        subbox/.style={draw=primary, rounded corners, fill=primary!20, minimum width=2.6cm, minimum height=1.25cm, align=center, font=\small\bfseries},
+        arrow/.style={->, thick, color=primary}
+    ]
+        \node[box] (img) at (0, 0) {Ảnh bữa ăn\\$640 \times 640 \times 3$};
+        \node[subbox] (bb) at (3.3, 0) {Backbone\\YOLOv11m\\(C3k2 + C2PSA)};
+        \node[box] (neck) at (6.7, 0) {Neck\\FPN + PAN\\(Đa tỷ lệ)};
+        \node[subbox] (head) at (10.1, 0) {Decoupled Head\\(Box + 68 lớp)\\+ NMS};
+        \node[box] (nutri) at (13.6, 0) {Tra cứu dinh dưỡng\\(Calo, P/C/F)\\Trả về JSON};
+
+        \draw[arrow] (img) -- (bb);
+        \draw[arrow] (bb) -- (neck);
+        \draw[arrow] (neck) -- (head);
+        \draw[arrow] (head) -- (nutri);
+    \end{tikzpicture}%
+    }
+    \caption{Kiến trúc pipeline nhận diện món ăn Việt Nam bằng YOLOv11m và tra cứu dinh dưỡng}
+    \label{fig:ch2_yolov11_arch}
+\end{figure}
+
+Để tận dụng tri thức thị giác đã học trên tập dữ liệu quy mô lớn, mô hình được khởi tạo từ bộ trọng số tiền huấn luyện (\textit{Transfer Learning}) trên bộ dữ liệu COCO và tiến hành tinh chỉnh cho bài toán 68 lớp món ăn Việt Nam.
+
+\subsection{Quy trình huấn luyện hai giai đoạn}
+
+Quá trình huấn luyện mô hình được tổ chức thành hai giai đoạn để đảm bảo hội tụ ổn định và đạt độ chính xác cao trên tập VietFood68:
+\begin{itemize}
+    \item \textbf{Giai đoạn 1 (Warm-up \& Đóng băng Backbone):} Đóng băng các tầng trích xuất đặc trưng đầu của Backbone trong những epoch đầu tiên, tập trung cập nhật trọng số phần Neck và Head để thích nghi với 68 lớp món ăn mới mà không làm xáo trộn các đặc trưng nền tảng.
+    \item \textbf{Giai đoạn 2 (Fine-tuning toàn bộ mô hình):} Mở khóa toàn bộ mạng YOLOv11m và huấn luyện tinh chỉnh với tốc độ học nhỏ kết hợp lịch trình giảm theo hàm cosin (\textit{Cosine Annealing LR}) và bộ tối ưu \textbf{AdamW}. Hàm mất mát tổng hợp gồm ba thành phần:
+    \begin{equation}
+        \mathcal{L}_{\text{total}} = \lambda_{\text{box}} \mathcal{L}_{\text{CIoU}} + \lambda_{\text{cls}} \mathcal{L}_{\text{BCE}} + \lambda_{\text{dfl}} \mathcal{L}_{\text{DFL}}
+    \end{equation}
+    trong đó $\mathcal{L}_{\text{CIoU}}$ tối ưu độ trùng khớp khung bao, $\mathcal{L}_{\text{BCE}}$ tối ưu phân loại 68 lớp món ăn và $\mathcal{L}_{\text{DFL}}$ (Distribution Focal Loss) tinh chỉnh độ chính xác biên của khung bao. Cơ chế Early Stopping được áp dụng dựa trên chỉ số \texttt{mAP@0.5:0.95} trên tập Validation.
+\end{itemize}
+
+\section{Phương pháp đánh giá mô hình}
+\label{sec:2.4}
+
+\subsection{Các độ đo đánh giá phát hiện đối tượng}
+
+Để đánh giá khách quan chất lượng mô hình YOLOv11m trên tập kiểm thử độc lập của VietFood68, đồ án sử dụng các tiêu chí chuẩn sau:
+\begin{itemize}
+    \item \textbf{Precision (Độ chính xác) và Recall (Độ triệu hồi):} Với một ngưỡng IoU xác định (ví dụ $\text{IoU} \ge 0.5$), các chỉ số được tính theo công thức:
+    \begin{equation}
+        \text{Precision} = \frac{TP}{TP + FP}, \qquad \text{Recall} = \frac{TP}{TP + FN}, \qquad F_1 = \frac{2 \times \text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}
+    \end{equation}
+    trong đó $TP$ là số món nhận diện đúng lớp và đúng vị trí, $FP$ là số dự đoán sai, $FN$ là số món bị bỏ sót.
+    \item \textbf{mAP@0.5 và mAP@0.5:0.95:} Là giá trị trung bình của Average Precision (AP) trên tất cả 68 lớp món ăn. Chỉ số \textbf{mAP@0.5} đánh giá tại ngưỡng chồng lấn $\text{IoU} = 0.5$, trong khi \textbf{mAP@0.5:0.95} tính trung bình trên 10 ngưỡng $\text{IoU}$ từ $0.5$ đến $0.95$ (bước nhảy $0.05$), phản ánh khắt khe độ chính xác của cả phân loại lẫn định vị khung bao.
+\end{itemize}
+
+\subsection{Tốc độ suy luận (Inference Speed)}
+
+Bên cạnh độ chính xác, tốc độ xử lý là yếu tố then chốt khi tích hợp vào ứng dụng di động thực tế. Tốc độ suy luận trung bình được đo theo công thức:
+\begin{equation}
+    \text{Speed} = \frac{S_T}{N} \quad (\text{ms/ảnh})
+\end{equation}
+trong đó $S_T$ là tổng thời gian xử lý $N$ ảnh kiểm thử thông qua ONNX Runtime trên máy chủ FastAPI. Ngưỡng mục tiêu của hệ thống là tổng thời gian từ lúc nhận ảnh đến khi trả về JSON kết quả dinh dưỡng dưới $1.5\text{ giây}$.
+
+\subsection{Phân tích nhóm món ăn và cơ chế hỗ trợ người dùng}
+
+Dựa trên đặc trưng ẩm thực của 68 lớp món ăn trong VietFood68, nhóm phân tích hiệu năng theo từng nhóm món để thiết kế cơ chế xử lý phù hợp trên giao diện ứng dụng:
+\begin{itemize}
+    \item \textbf{Nhóm món có hình thái đặc trưng rõ ràng:} Các món như Bánh mì, Gỏi cuốn, Bánh xèo, Cơm tấm, Bún đậu mắm tôm có kết cấu bề mặt và bố cục dễ phân biệt nên mô hình đạt độ tin cậy cao.
+    \item \textbf{Nhóm món nước có độ tương đồng cao:} Một số món như Phở bò, Phở gà, Hủ tiếu, Bún bò Huế có cấu trúc tô nước dùng và sợi trắng gần giống nhau, dễ gây nhầm lẫn khi góc chụp bị khuất topping hoặc thiếu sáng. Để khắc phục trong trải nghiệm thực tế, AI Service trả về danh sách các ứng viên có độ tin cậy cao nhất kèm xác suất để người dùng xác nhận hoặc chọn lại nhanh trước khi lưu vào nhật ký.
+\end{itemize}
+
+\section{Tích hợp mô hình và Cơ sở dữ liệu ban đầu của hệ thống}
+\label{sec:2.5}
+
+\subsection{Xuất mô hình ONNX và tích hợp dịch vụ AI (FastAPI)}
+
+Sau khi hoàn tất huấn luyện và chọn được bộ trọng số tốt nhất trên tập Validation, mô hình YOLOv11m được xuất sang định dạng \textbf{ONNX} (\texttt{yolov11m\_vietfood68.onnx}) với kích thước đầu vào cố định $640 \times 640$ và tối ưu hóa đồ thị tính toán. Mô hình sau đó được đóng gói trong dịch vụ \textbf{Python FastAPI} theo quy trình:
+\begin{enumerate}
+    \item \textbf{Khởi tạo phiên suy luận:} Khi FastAPI khởi động, tệp \texttt{.onnx} và bảng ánh xạ nhãn 68 món ăn được nạp một lần duy nhất vào \texttt{onnxruntime.InferenceSession}.
+    \item \textbf{Tiền xử lý và suy luận:} Ảnh gửi từ Backend Spring Boot được chuyển sang không gian màu RGB, resize letterbox về $640 \times 640$, chuyển thành tensor chuẩn NCHW $(1, 3, 640, 640)$ và đưa qua ONNX Runtime.
+    \item \textbf{Hậu xử lý và ước lượng dinh dưỡng:} Áp dụng thuật toán Non-Maximum Suppression (NMS) để loại bỏ khung bao trùng lặp, tính toán khẩu phần dựa trên diện tích/số lượng món phát hiện được, tra cứu bảng dữ liệu dinh dưỡng (calo, Protein, Carbs, Fat) và trả về kết quả JSON chuẩn hóa cho Backend Spring Boot.
+\end{enumerate}
+
+Kiến trúc này giúp toàn bộ pipeline nhận diện món ăn Việt Nam và ước lượng calo vận hành độc lập, bảo mật dữ liệu và không phát sinh chi phí gọi API AI bên thứ ba.
+
+\subsection{Lược đồ cơ sở dữ liệu ứng dụng (Thiết kế ban đầu)}
+
+Bên cạnh bảng dữ liệu dinh dưỡng phục vụ tra cứu cho AI, cơ sở dữ liệu quan hệ của ứng dụng trên PostgreSQL được thiết kế hoàn chỉnh ngay từ giai đoạn đầu với các thực thể chính chia theo 6 nhóm nghiệp vụ như tổng hợp trong Bảng \ref{tab:ch2_initial_entities}.
+
+\begin{table}[H]
+    \centering
+    \caption{Các thực thể chính trong lược đồ cơ sở dữ liệu ban đầu của ứng dụng}
+    \label{tab:ch2_initial_entities}
+    \arrayrulecolor{primary}
+    \rowcolors{2}{primary!10}{white}
+    \begin{tabular}{|p{0.23\textwidth}|p{0.31\textwidth}|p{0.36\textwidth}|}
+        \hline
+        \rowcolor{primary!35}
+        \textbf{Nhóm nghiệp vụ} & \textbf{Các thực thể chính} & \textbf{Vai trò lưu trữ} \\
+        \hline
+        Người dùng \& Sức khỏe & \texttt{User}, \texttt{UserHealthProfile}, \texttt{WeightLog}, \texttt{WaterLog} & Quản lý tài khoản, thông tin thể trạng, dị ứng, mục tiêu BMI/TDEE, lịch sử cân nặng và lượng nước uống hằng ngày. \\
+        \hline
+        Dinh dưỡng \& Nhật ký ăn & \texttt{Food}, \texttt{UserFoodLog} & Lưu dữ liệu 68 món VietFood68, sản phẩm mã vạch, món tùy chỉnh và nhật ký bữa ăn (ghi log qua AI ảnh hoặc quét mã vạch). \\
+        \hline
+        Thực đơn \& Tổng hợp & \texttt{MealPlan}, \texttt{MealPlanFood}, \texttt{DailySummary} & Lưu thực đơn cá nhân hóa theo ngày/tuần và bảng tổng hợp chỉ số dinh dưỡng, vận động theo từng ngày. \\
+        \hline
+        Vận động \& Đồng bộ & \texttt{ActivityLog}, \texttt{HealthSyncLog} & Lưu hoạt động tập luyện và dữ liệu bước chân, nhịp tim đồng bộ từ Google Fit / Apple Health. \\
+        \hline
+        Trợ lý AI \& Thông báo & \texttt{Conversation}, \texttt{ChatMessage}, \texttt{Notification} & Lưu phiên hội thoại Chatbot tư vấn dinh dưỡng và thông báo nhắc nhở thông minh (FCM). \\
+        \hline
+        Động lực \& Cộng đồng & \texttt{Streak}, \texttt{Badge}, \texttt{UserBadge}, \texttt{Challenge}, \texttt{UserChallenge}, \texttt{Friendship} & Lưu chuỗi ngày hoàn thành mục tiêu, hệ thống huy hiệu, thử thách và quan hệ kết bạn phục vụ bảng xếp hạng. \\
+        \hline
+    \end{tabular}
+    \arrayrulecolor{black}
+    \rowcolors{2}{}{}
+\end{table}
+
+Mối liên kết tổng quan giữa các nhóm thực thể xoay quanh thực thể trung tâm \texttt{User} được minh họa trong Hình \ref{fig:ch2_er_overview}, làm cơ sở cho việc cài đặt ánh xạ ORM (Spring Data JPA / Hibernate) và tối ưu truy vấn ở các bước tiếp theo.
+
+\begin{figure}[H]
+    \centering
+    \resizebox{0.96\textwidth}{!}{%
+    \begin{tikzpicture}[
+        ent/.style={draw=primary, rounded corners, fill=primary!10, minimum width=3.2cm, minimum height=1.0cm, align=center, font=\small},
+        core/.style={draw=primary, rounded corners, fill=primary!22, minimum width=2.8cm, minimum height=1.1cm, align=center, font=\small\bfseries},
+        link/.style={->, thick, color=primary}
+    ]
+        \node[core] (user) at (0, 0) {User\\(Thực thể trung tâm)};
+
+        \node[ent] (hp) at (-5.0, 2.2) {UserHealthProfile\\WeightLog, WaterLog};
+        \node[ent] (food) at (0, 2.4) {UserFoodLog -- Food\\(AI Ảnh / Mã vạch)};
+        \node[ent] (plan) at (5.0, 2.2) {MealPlan, MealPlanFood\\DailySummary};
+
+        \node[ent] (act) at (-5.0, -2.2) {ActivityLog\\HealthSyncLog};
+        \node[ent] (ai) at (0, -2.4) {Conversation, ChatMessage\\Notification};
+        \node[ent] (gam) at (5.0, -2.2) {Streak, Badge, Challenge\\Friendship};
+
+        \draw[link] (user) -- (hp);
+        \draw[link] (user) -- (food);
+        \draw[link] (user) -- (plan);
+        \draw[link] (user) -- (act);
+        \draw[link] (user) -- (ai);
+        \draw[link] (user) -- (gam);
+    \end{tikzpicture}%
+    }
+    \caption{Sơ đồ liên kết tổng quan các nhóm thực thể cơ sở dữ liệu ban đầu}
+    \label{fig:ch2_er_overview}
+\end{figure}
+
+\section{Kết luận chương 2}
+\label{sec:2.6}
+
+Chương 2 đã trình bày toàn diện quá trình xây dựng mô hình phát hiện và nhận diện món ăn Việt Nam bằng \textbf{YOLOv11m} trên bộ dữ liệu \textbf{VietFood68} (68 lớp món ăn), từ khâu thu thập, gán nhãn, tăng cường dữ liệu đến kiến trúc mạng, chiến lược huấn luyện hai giai đoạn và phương pháp đánh giá. Đồng thời, chương cũng hoàn thiện giải pháp xuất mô hình sang \textbf{ONNX} tích hợp trong dịch vụ \textbf{FastAPI} và thiết kế lược đồ cơ sở dữ liệu ban đầu gồm đầy đủ các thực thể cốt lõi của ứng dụng. Kết quả của Chương 2 là nền tảng kỹ thuật trực tiếp để triển khai phân tích, thiết kế chi tiết hệ thống ở Chương 3.
+
+\end{document}

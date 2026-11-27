@@ -1,0 +1,105 @@
+\documentclass[main.tex]{subfiles}
+
+\begin{document}
+\newgeometry{top=2.2cm, bottom=2.2cm, left=2.5cm, right=2.5cm}
+
+% ================= TRANG BÌA NGOÀI (CÓ KHUNG) =================
+\begin{titlepage}
+\thispagestyle{empty}
+
+% --- KHUNG VIỀN ---
+\noindent
+\begin{tikzpicture}[remember picture, overlay]
+    \node[inner sep=0pt] at (current page.center) {
+        \includegraphics[]{img/frame.pdf}
+    };
+\end{tikzpicture}%
+
+\begin{spacing}{1.2}
+\begin{center}
+    % --- TIÊU ĐỀ ---
+    \vspace*{0.6cm}
+    {\large \textbf{HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH VIỄN THÔNG}} \\[0.15cm]
+    {\large \textbf{KHOA CÔNG NGHỆ THÔNG TIN}}
+
+    \vfill
+
+    % --- LOGO ---
+    \includegraphics[width=3.8cm]{img/ptit_logo.png}
+
+    \vfill
+
+    % --- TÊN ĐỒ ÁN ---
+    {\LARGE \textbf{ĐỒ ÁN}} \\[0.2cm]
+    {\LARGE \textbf{TỐT NGHIỆP ĐẠI HỌC}} \\[0.35cm]
+    {\Large \textbf{Đề tài:}} \\[0.25cm]
+    {\Large \textbf{Xây dựng ứng dụng hỗ trợ chăm sóc sức khỏe và dinh dưỡng tích hợp AI}}
+
+    \vfill
+
+    % --- THÔNG TIN GIẢNG VIÊN VÀ SINH VIÊN ---
+    \begin{tabular}{@{}l@{\hspace{1.2cm}}l@{}}
+        \multicolumn{2}{@{}l}{\textbf{Giảng viên hướng dẫn: TS. Vũ Văn Thỏa}} \\[0.35cm]
+        \multicolumn{2}{@{}l}{\textit{\textbf{Sinh viên thực hiện:}}} \\[0.25cm]
+        \hspace*{0.5cm}\textbf{1. Trần Bá Lợi} & \textbf{MSV: B22DCCN510} \\[0.2cm]
+        \hspace*{0.5cm}\textbf{2. Bùi Văn Nam} & \textbf{MSV: B22DCCN551} \\[0.2cm]
+        \hspace*{0.5cm}\textbf{3. Trần Đức Trung} & \textbf{MSV: B22DCCN875}
+    \end{tabular}
+
+    \vfill
+    \vfill
+
+    % --- ĐỊA ĐIỂM ---
+    {\textbf{Hà Nội 2026}}
+    \vspace*{0.6cm}
+\end{center}
+\end{spacing}
+\end{titlepage}
+
+% ================= TRANG BÌA TRONG (KHÔNG KHUNG) =================
+\begin{titlepage}
+\thispagestyle{empty}
+
+\begin{spacing}{1.2}
+\begin{center}
+    % --- TIÊU ĐỀ ---
+    \vspace*{0.6cm}
+    {\large \textbf{HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH VIỄN THÔNG}} \\[0.15cm]
+    {\large \textbf{KHOA CÔNG NGHỆ THÔNG TIN}}
+
+    \vfill
+
+    % --- LOGO ---
+    \includegraphics[width=3.8cm]{img/ptit_logo.png}
+
+    \vfill
+
+    % --- TÊN ĐỒ ÁN ---
+    {\LARGE \textbf{ĐỒ ÁN}} \\[0.2cm]
+    {\LARGE \textbf{TỐT NGHIỆP ĐẠI HỌC}} \\[0.35cm]
+    {\Large \textbf{Đề tài:}} \\[0.25cm]
+    {\Large \textbf{Xây dựng ứng dụng hỗ trợ chăm sóc sức khỏe và dinh dưỡng tích hợp AI}}
+
+    \vfill
+
+    % --- THÔNG TIN GIẢNG VIÊN VÀ SINH VIÊN ---
+    \begin{tabular}{@{}l@{\hspace{1.2cm}}l@{}}
+        \multicolumn{2}{@{}l}{\textbf{Giảng viên hướng dẫn: TS. Vũ Văn Thỏa}} \\[0.35cm]
+        \multicolumn{2}{@{}l}{\textit{\textbf{Sinh viên thực hiện:}}} \\[0.25cm]
+        \hspace*{0.5cm}\textbf{1. Trần Bá Lợi} & \textbf{MSV: B22DCCN510} \\[0.2cm]
+        \hspace*{0.5cm}\textbf{2. Bùi Văn Nam} & \textbf{MSV: B22DCCN551} \\[0.2cm]
+        \hspace*{0.5cm}\textbf{3. Trần Đức Trung} & \textbf{MSV: B22DCCN875}
+    \end{tabular}
+
+    \vfill
+    \vfill
+
+    % --- ĐỊA ĐIỂM ---
+    {\textbf{Hà Nội 2026}}
+    \vspace*{0.6cm}
+\end{center}
+\end{spacing}
+\end{titlepage}
+
+\restoregeometry
+\end{document}
